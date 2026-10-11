@@ -35,10 +35,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .app-shell { display: flex; min-height: 100vh; width: 100%; }
 .sidebar { background: #0d1112; border-right: 1px solid #20282a; color: #f0f2ee; display: flex; flex-direction: column; width: 252px; min-height: 0; padding: 23px 14px 14px; position: fixed; left: 0; top: 0; height: 100vh; height: 100dvh; overflow-y: auto; overscroll-behavior-y: contain; z-index: 20; }
 .sidebar > * { flex-shrink: 0; }
-.brand { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 0 10px 24px; }
-/* Dedicated PNG wordmark: no CSS crop or generated text branding. */
-.brand-logo-frame { align-items: center; background: transparent; display: flex; flex: 0 0 auto; height: 38px; width: auto; max-width: 155px; }
-.brand-logo-frame img { display: block; height: 32px; width: auto; max-width: 100%; object-fit: contain; }
+.brand { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 0 10px 24px; }
+.brand-title { color: #f3f6f5; font-family: 'DM Sans', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: .12em; line-height: 1.1; text-transform: uppercase; }
 .brand-subtitle, .workspace-switcher small, .data-status small, .user-chip small { color: #98a39e; display: block; font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: .08em; margin-top: 3px; text-transform: uppercase; }
 .brand-subtitle { font-size: 9px; margin-top: 0; }
 .workspace-switcher { align-items: center; background: #313937; border: 1px solid #414a46; display: flex; gap: 9px; margin: 0 0 27px; padding: 10px 9px; }

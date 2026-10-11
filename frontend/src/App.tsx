@@ -299,7 +299,7 @@ function App() {
       <aside id="primary-sidebar" className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
         <button className="mobile-menu" aria-label="Close navigation" onClick={() => setSidebarOpen(false)}><X size={20} /></button>
         <div className="brand">
-           <div className="brand-logo-frame"><img src="/vanta-brand.png" alt="VANTA" /></div>
+          <div className="brand-title">VANTA</div>
           <small className="brand-subtitle">Customer intelligence</small>
         </div>
         <div className="workspace-switcher" role="button" tabIndex={0} onClick={() => setToast('Workspace switcher is ready for additional workspaces')}>
