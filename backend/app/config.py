@@ -4,6 +4,17 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
+try:
+    from dotenv import load_dotenv
+
+    env_path = Path(__file__).resolve().parent.parent / ".env"
+    if env_path.exists():
+        load_dotenv(env_path)
+    else:
+        load_dotenv()
+except ImportError:
+    pass
+
 
 def _csv_env(name: str, default: str) -> tuple[str, ...]:
     value = os.getenv(name, default)
