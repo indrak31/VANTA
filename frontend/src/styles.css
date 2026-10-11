@@ -36,9 +36,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .sidebar { background: #0d1112; border-right: 1px solid #20282a; color: #f0f2ee; display: flex; flex-direction: column; width: 252px; min-height: 0; padding: 23px 14px 14px; position: fixed; left: 0; top: 0; height: 100vh; height: 100dvh; overflow-y: auto; overscroll-behavior-y: contain; z-index: 20; }
 .sidebar > * { flex-shrink: 0; }
 .brand { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 0 10px 24px; }
-/* Crop the asset's black padding; its 1347px wordmark scales to about 155px. */
-.brand-logo-frame { background: #000; flex: 0 0 auto; height: 44px; overflow: hidden; position: relative; width: 168px; }
-.brand-logo-frame img { display: block; height: auto; left: -32px; max-width: none; position: absolute; top: -17px; width: 230px; }
+/* Dedicated PNG wordmark: no CSS crop or generated text branding. */
+.brand-logo-frame { align-items: center; background: #000; display: flex; flex: 0 0 auto; height: 48px; overflow: hidden; width: 168px; }
+.brand-logo-frame img { display: block; height: auto; max-width: 100%; object-fit: contain; width: 168px; }
 .brand-subtitle, .workspace-switcher small, .data-status small, .user-chip small { color: #98a39e; display: block; font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: .08em; margin-top: 3px; text-transform: uppercase; }
 .brand-subtitle { font-size: 9px; margin-top: 0; }
 .workspace-switcher { align-items: center; background: #313937; border: 1px solid #414a46; display: flex; gap: 9px; margin: 0 0 27px; padding: 10px 9px; }

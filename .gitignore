@@ -13,3 +13,5 @@ frontend/vite-error.log
 __pycache__/
 *.py[cod]
 .opencode/
+/*.png
+vanta-desktop.png
