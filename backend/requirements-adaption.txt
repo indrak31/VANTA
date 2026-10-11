@@ -1,0 +1,2 @@
+# Optional official SDK. The API remains usable without it.
+adaption==0.14.0

@@ -1,0 +1,11 @@
+backend/.venv/
+backend/.env
+backend/data/*.sqlite3
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/vite.log
+frontend/vite-error.log
+__pycache__/
+*.py[cod]
+.opencode/
