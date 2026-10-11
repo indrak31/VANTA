@@ -325,7 +325,7 @@ function App() {
       {sidebarOpen && <button className="sidebar-overlay" aria-label="Close navigation" onClick={() => setSidebarOpen(false)} />}
       <main className="main-content">
         <header className="topbar">
-          <button className="mobile-menu" aria-label={sidebarOpen ? 'Close navigation' : 'Open navigation'} aria-controls="primary-sidebar" aria-expanded={sidebarOpen} onClick={() => setSidebarOpen((open) => !open)}><Menu size={20} /></button>
+          <button className="mobile-menu" aria-label={sidebarOpen ? 'Close navigation' : 'Open navigation'} aria-controls="primary-sidebar" aria-expanded={sidebarOpen} onClick={() => setSidebarOpen((open) => !open)}>{sidebarOpen ? <X size={20} /> : <Menu size={20} />}</button>
            <div className="breadcrumbs"><span>Northstar / Product</span><ChevronRight size={14} /><strong>{meta.title}</strong></div>
           <div className="topbar-actions"><button className="icon-button" aria-label="Help" onClick={() => setToast('Signal glossary and workflow guidance are available here')}><CircleHelp size={18} /></button><span className="topbar-divider" /><span className="sync-label"><span className="status-dot online" />Synced 8 min ago</span></div>
         </header>
