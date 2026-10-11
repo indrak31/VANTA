@@ -1,4 +1,6 @@
 backend/.venv/
+.env
+*.env
 backend/.env
 backend/data/*.sqlite3
 frontend/node_modules/
