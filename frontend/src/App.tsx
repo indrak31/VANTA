@@ -147,7 +147,7 @@ function App() {
     return () => window.removeEventListener('hashchange', onHash)
   }, [])
 
-  const apiEndpoint = import.meta.env.VITE_API_URL as string | undefined
+  const apiEndpoint = (import.meta.env.VITE_API_URL as string | undefined) || 'http://127.0.0.1:8000'
 
   useEffect(() => {
     if (!apiEndpoint) return
@@ -317,7 +317,7 @@ function App() {
           ))}
         </nav>
         <div className="sidebar-bottom">
-         <div className="data-status"><span className={`status-dot ${apiState === 'connected' ? 'online' : ''}`} /><div><strong>{apiState === 'connected' ? 'Live API connected' : 'Demo dataset'}</strong><small>{apiState === 'connected' ? import.meta.env.VITE_API_URL : 'Synthetic examples · local only'}</small></div></div>
+         <div className="data-status"><span className={`status-dot ${apiState === 'connected' ? 'online' : ''}`} /><div><strong>{apiState === 'connected' ? 'Live API connected' : 'Demo dataset'}</strong><small>{apiState === 'connected' ? apiEndpoint : 'Synthetic examples · local only'}</small></div></div>
           <button className="nav-item" onClick={() => setToast('Settings are available in your workspace admin console')}><Settings2 size={17} /><span>Settings</span></button>
           <div className="user-chip"><div className="avatar">JD</div><div><strong>Jordan Davis</strong><small>Product operations</small></div><button aria-label="Open profile menu" onClick={() => setToast('Profile menu opened')}><ChevronRight size={15} /></button></div>
         </div>
