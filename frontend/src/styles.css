@@ -37,8 +37,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .sidebar > * { flex-shrink: 0; }
 .brand { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 0 10px 24px; }
 /* Dedicated PNG wordmark: no CSS crop or generated text branding. */
-.brand-logo-frame { align-items: center; background: #000; display: flex; flex: 0 0 auto; height: 48px; overflow: hidden; width: 168px; }
-.brand-logo-frame img { display: block; height: auto; max-width: 100%; object-fit: contain; width: 168px; }
+.brand-logo-frame { align-items: center; background: transparent; display: flex; flex: 0 0 auto; height: 38px; width: auto; max-width: 155px; }
+.brand-logo-frame img { display: block; height: 32px; width: auto; max-width: 100%; object-fit: contain; }
 .brand-subtitle, .workspace-switcher small, .data-status small, .user-chip small { color: #98a39e; display: block; font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: .08em; margin-top: 3px; text-transform: uppercase; }
 .brand-subtitle { font-size: 9px; margin-top: 0; }
 .workspace-switcher { align-items: center; background: #313937; border: 1px solid #414a46; display: flex; gap: 9px; margin: 0 0 27px; padding: 10px 9px; }
