@@ -95,6 +95,22 @@ class AdaptionAdapter:
                                 error_code=exc.code, error_message=exc.message)
         payload = {key: value for key, value in request.items() if key != "dataset_id" and value is not None}
         payload["estimate"] = estimate
+
+        # Safeguard: if job_specification has max_rows exceeding dataset row_count, clamp or omit it
+        if "job_specification" in payload and isinstance(payload["job_specification"], dict):
+            max_rows = payload["job_specification"].get("max_rows")
+            if max_rows is not None:
+                try:
+                    ds_meta = client.datasets.get_status(dataset_id)
+                    ds_rows = getattr(ds_meta, "row_count", None)
+                    if ds_rows is not None and max_rows > ds_rows:
+                        if ds_rows > 0:
+                            payload["job_specification"]["max_rows"] = ds_rows
+                        else:
+                            payload.pop("job_specification", None)
+                except Exception:
+                    payload.pop("job_specification", None)
+
         try:
             # adapt is the current official operation; run is retained as the
             # SDK's deprecated compatibility alias for callers that request it.

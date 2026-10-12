@@ -834,9 +834,11 @@ function AdaptionLabConnected({
   onReviewExperiment: (experiment: AdaptationExperiment) => void
 }) {
   const [availability, setAvailability] = useState<AdaptionAvailability | null>(null)
-  const [datasetId, setDatasetId] = useState('f7da0d5c-4273-4c94-aef3-e37123cbada4')
+  const [datasetId, setDatasetId] = useState('2afb553c-ce07-4d30-98cc-1cedb5f211b8')
   const [remoteDatasets, setRemoteDatasets] = useState<AdaptionRemoteDataset[]>([
-    { id: 'f7da0d5c-4273-4c94-aef3-e37123cbada4', name: 'vanta_customer_feedback', status: 'awaiting_input', row_count: 6 },
+    { id: '2afb553c-ce07-4d30-98cc-1cedb5f211b8', name: 'user_feedback_classification', status: 'awaiting_input', row_count: 7 },
+    { id: '4fc291e8-a91e-44e5-9c29-d9651adc9051', name: 'vanta_signals_7830', status: 'awaiting_input', row_count: 7 },
+    { id: 'f7da0d5c-4273-4c94-aef3-e37123cbada4', name: 'user_feedback_categories', status: 'running', row_count: 6 },
   ])
   const [uploadingDataset, setUploadingDataset] = useState(false)
   const [run, setRun] = useState<AdaptionRun | null>(null)
@@ -851,7 +853,12 @@ function AdaptionLabConnected({
       .then((datasets) => {
         if (datasets.length > 0) {
           setRemoteDatasets(datasets)
-          setDatasetId((prev) => (prev ? prev : datasets[0].id))
+          const readyDataset = datasets.find((d) => d.status === 'awaiting_input') || datasets[0]
+          setDatasetId((prev) => {
+            const currentObj = datasets.find((d) => d.id === prev)
+            if (currentObj && currentObj.status === 'awaiting_input') return prev
+            return readyDataset.id
+          })
         }
       })
       .catch(() => undefined)
@@ -900,7 +907,6 @@ function AdaptionLabConnected({
       const result = await runAdaptionOperation(apiEndpoint, operation, {
         dataset_id: datasetId.trim(),
         column_mapping: { prompt: 'text', completion: 'category', context: ['rating', 'source'] },
-        job_specification: { max_rows: 100 },
         recipe_specification: { recipes: { deduplication: true, prompt_rephrase: false } },
         brand_controls: { length: 'concise', hallucination_mitigation: true, blueprint: 'Use only the supplied customer evidence. Do not invent customer claims.' },
       })
@@ -954,9 +960,9 @@ function AdaptionLabConnected({
                 type="button"
                 className={`dataset-chip-btn ${datasetId === ds.id ? 'active' : ''}`}
                 onClick={() => setDatasetId(ds.id)}
-                title={ds.id}
+                title={`${ds.id} · ${ds.status}`}
               >
-                <strong>{ds.name}</strong> <small>({ds.id.slice(0, 8)}…)</small>
+                <strong>{ds.name}</strong> <small>({ds.row_count || 7} rows · {ds.status === 'running' ? 'running' : 'ready'})</small>
               </button>
             ))}
             <button
