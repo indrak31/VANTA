@@ -1,34 +1,50 @@
 declare module 'lucide-react' {
   import type { ComponentType, SVGProps } from 'react'
   export type LucideProps = SVGProps<SVGSVGElement> & { size?: number | string; strokeWidth?: number | string }
+  export const Activity: ComponentType<LucideProps>
   export const ArrowDown: ComponentType<LucideProps>
+  export const ArrowRight: ComponentType<LucideProps>
   export const ArrowUp: ComponentType<LucideProps>
   export const BarChart3: ComponentType<LucideProps>
   export const Bookmark: ComponentType<LucideProps>
   export const BookmarkCheck: ComponentType<LucideProps>
   export const Check: ComponentType<LucideProps>
+  export const CheckCircle2: ComponentType<LucideProps>
   export const ChevronRight: ComponentType<LucideProps>
   export const CircleHelp: ComponentType<LucideProps>
+  export const Clock: ComponentType<LucideProps>
+  export const Cpu: ComponentType<LucideProps>
+  export const Database: ComponentType<LucideProps>
   export const Download: ComponentType<LucideProps>
   export const ExternalLink: ComponentType<LucideProps>
   export const FileBarChart: ComponentType<LucideProps>
   export const Filter: ComponentType<LucideProps>
   export const FlaskConical: ComponentType<LucideProps>
   export const Gauge: ComponentType<LucideProps>
+  export const GitBranch: ComponentType<LucideProps>
   export const Inbox: ComponentType<LucideProps>
+  export const Info: ComponentType<LucideProps>
+  export const Layers: ComponentType<LucideProps>
   export const LayoutDashboard: ComponentType<LucideProps>
   export const Menu: ComponentType<LucideProps>
+  export const MessageSquare: ComponentType<LucideProps>
   export const PanelRightClose: ComponentType<LucideProps>
+  export const Play: ComponentType<LucideProps>
   export const Plus: ComponentType<LucideProps>
   export const Radar: ComponentType<LucideProps>
   export const RefreshCw: ComponentType<LucideProps>
   export const Search: ComponentType<LucideProps>
   export const Send: ComponentType<LucideProps>
   export const Settings2: ComponentType<LucideProps>
+  export const Shield: ComponentType<LucideProps>
+  export const Sliders: ComponentType<LucideProps>
   export const SlidersHorizontal: ComponentType<LucideProps>
   export const Sparkles: ComponentType<LucideProps>
   export const Target: ComponentType<LucideProps>
+  export const Terminal: ComponentType<LucideProps>
   export const TrendingDown: ComponentType<LucideProps>
   export const TrendingUp: ComponentType<LucideProps>
+  export const Users: ComponentType<LucideProps>
   export const X: ComponentType<LucideProps>
+  export const Zap: ComponentType<LucideProps>
 }

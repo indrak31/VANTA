@@ -74,6 +74,7 @@ import type {
   Scenario,
   ViewKey,
 } from './types'
+import { LandingPage } from './landing/LandingPage'
 import './styles.css'
 
 const navItems: { key: ViewKey; label: string; icon: typeof LayoutDashboard }[] = [
@@ -137,6 +138,13 @@ const initialWorkspaces: WorkspaceInfo[] = [
 type RecipientItem = { initials: string; name: string; note: string }
 
 function App() {
+  const [appMode, setAppMode] = useState<'landing' | 'app'>(() => {
+    const candidate = window.location.hash.slice(1)
+    if (candidate === 'app' || navItems.some((item) => item.key === candidate)) {
+      return 'app'
+    }
+    return 'landing'
+  })
   const [view, setView] = useState<ViewKey>(() => {
     const candidate = window.location.hash.slice(1) as ViewKey
     return navItems.some((item) => item.key === candidate) ? candidate : 'overview'
@@ -167,8 +175,15 @@ function App() {
 
   useEffect(() => {
     const onHash = () => {
-      const candidate = window.location.hash.slice(1) as ViewKey
-      if (navItems.some((item) => item.key === candidate)) setView(candidate)
+      const candidate = window.location.hash.slice(1)
+      if (candidate === 'landing' || candidate === '') {
+        setAppMode('landing')
+      } else if (candidate === 'app') {
+        setAppMode('app')
+      } else if (navItems.some((item) => item.key === candidate)) {
+        setAppMode('app')
+        setView(candidate as ViewKey)
+      }
     }
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
@@ -320,12 +335,32 @@ function App() {
     setToast(`${name} downloaded`)
   }
 
+  if (appMode === 'landing') {
+    return (
+      <LandingPage
+        onLaunchApp={() => {
+          window.location.hash = '#overview'
+          setAppMode('app')
+          setView('overview')
+        }}
+      />
+    )
+  }
+
   const meta = pageMeta[view]
   return (
     <div className="app-shell">
       <aside id="primary-sidebar" className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
         <button className="mobile-menu" aria-label="Close navigation" onClick={() => setSidebarOpen(false)}><X size={20} /></button>
-        <div className="brand">
+        <div
+          className="brand"
+          style={{ cursor: 'pointer' }}
+          onClick={() => {
+            window.location.hash = '#landing'
+            setAppMode('landing')
+          }}
+          title="Return to Landing Page"
+        >
           <div className="brand-logo-frame"><img src="/vanta-brand.png" alt="VANTA" /></div>
           <small className="brand-subtitle">Customer intelligence</small>
         </div>
@@ -479,6 +514,16 @@ function App() {
             <strong>{meta.title}</strong>
           </div>
           <div className="topbar-actions">
+            <button
+              className="button button-secondary"
+              style={{ padding: '5px 12px', fontSize: '12px' }}
+              onClick={() => {
+                window.location.hash = '#landing'
+                setAppMode('landing')
+              }}
+            >
+              ← Website
+            </button>
             <button className="icon-button" aria-label="Help" onClick={() => setHelpOpen(true)}>
               <CircleHelp size={18} />
             </button>
