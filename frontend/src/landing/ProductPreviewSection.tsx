@@ -12,13 +12,8 @@ import {
   Cell,
 } from 'recharts'
 import {
-  Filter,
-  TrendingUp,
-  Sparkles,
   ArrowRight,
-  Shield,
-  Clock,
-  Layers,
+  Sparkles,
 } from 'lucide-react'
 
 type TimeRange = '7d' | '30d' | '90d'
@@ -56,27 +51,27 @@ const timeSeriesData: Record<TimeRange, DatasetPoint[]> = {
 
 const themeDistributions: Record<ChannelFilter, { name: string; count: number; color: string }[]> = {
   all: [
-    { name: 'Response Latency', count: 48, color: '#8B5CF6' },
-    { name: 'Search Precision', count: 36, color: '#38BDF8' },
-    { name: 'Onboarding Flow', count: 28, color: '#A78BFA' },
-    { name: 'Data Governance', count: 22, color: '#60A5FA' },
-    { name: 'Export Formatting', count: 18, color: '#818CF8' },
+    { name: 'Response Latency', count: 48, color: '#E2E8F0' },
+    { name: 'Search Precision', count: 36, color: '#CBD5E1' },
+    { name: 'Onboarding Flow', count: 28, color: '#94A3B8' },
+    { name: 'Data Governance', count: 22, color: '#64748B' },
+    { name: 'Export Formatting', count: 18, color: '#475569' },
   ],
   support: [
-    { name: 'Response Latency', count: 34, color: '#8B5CF6' },
-    { name: 'Search Precision', count: 29, color: '#38BDF8' },
-    { name: 'Data Governance', count: 18, color: '#60A5FA' },
-    { name: 'Export Formatting', count: 12, color: '#818CF8' },
+    { name: 'Response Latency', count: 34, color: '#E2E8F0' },
+    { name: 'Search Precision', count: 29, color: '#CBD5E1' },
+    { name: 'Data Governance', count: 18, color: '#64748B' },
+    { name: 'Export Formatting', count: 12, color: '#475569' },
   ],
   surveys: [
-    { name: 'Onboarding Flow', count: 22, color: '#A78BFA' },
-    { name: 'Response Latency', count: 14, color: '#8B5CF6' },
-    { name: 'Export Formatting', count: 10, color: '#818CF8' },
+    { name: 'Onboarding Flow', count: 22, color: '#E2E8F0' },
+    { name: 'Response Latency', count: 14, color: '#CBD5E1' },
+    { name: 'Export Formatting', count: 10, color: '#475569' },
   ],
   interviews: [
-    { name: 'Data Governance', count: 16, color: '#60A5FA' },
-    { name: 'Response Latency', count: 14, color: '#8B5CF6' },
-    { name: 'Search Precision', count: 12, color: '#38BDF8' },
+    { name: 'Data Governance', count: 16, color: '#E2E8F0' },
+    { name: 'Response Latency', count: 14, color: '#CBD5E1' },
+    { name: 'Search Precision', count: 12, color: '#94A3B8' },
   ],
 }
 
@@ -133,10 +128,10 @@ export function ProductPreviewSection({ onExploreApp }: { onExploreApp: () => vo
   return (
     <section className="landing-section" id="product">
       <div className="section-header">
-        <span className="section-eyebrow">Interactive Product Intelligence</span>
+        <span className="section-eyebrow">Enterprise Telemetry</span>
         <h2 className="section-title">The full fidelity of customer signal</h2>
         <p className="section-subtitle">
-          Explore a live interactive preview of the Vanta Signal OS. Change the time horizon or ingestion channel to see instant recalculations across volume, sentiment trends, and prioritized actions.
+          Explore a live interactive preview of the Vanta Signal OS. Filter by timeframe or channel to see instant updates across volume, sentiment trends, and prioritized actions.
         </p>
       </div>
 
@@ -144,7 +139,7 @@ export function ProductPreviewSection({ onExploreApp }: { onExploreApp: () => vo
         {/* Toolbar with active filters */}
         <div className="preview-toolbar">
           <div className="preview-pill-notice">
-            ILLUSTRATIVE DEMO DATA · SYNTHETIC WORKSPACE
+            LIVE ANALYTICS PREVIEW · WORKSPACE INSTANCE
           </div>
 
           <div className="preview-filters-group">
@@ -159,7 +154,7 @@ export function ProductPreviewSection({ onExploreApp }: { onExploreApp: () => vo
               </button>
             ))}
 
-            <div style={{ width: 1, height: 18, background: 'rgba(255,255,255,0.1)', margin: '0 4px' }} />
+            <div style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.1)', margin: '0 4px' }} />
 
             {/* Channels */}
             {(['all', 'support', 'surveys', 'interviews'] as ChannelFilter[]).map((ch) => (
@@ -217,38 +212,38 @@ export function ProductPreviewSection({ onExploreApp }: { onExploreApp: () => vo
           <div className="preview-chart-box">
             <div className="preview-chart-header">
               <h4>Signal Momentum & Resolution Velocity</h4>
-              <span style={{ fontSize: 11, color: '#8A8F98' }}>Window: {timeRange}</span>
+              <span style={{ fontSize: 11, color: '#64748B', fontFamily: 'monospace' }}>Window: {timeRange}</span>
             </div>
             <div style={{ width: '100%', height: 260 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartSeries} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="mentionsGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0.0} />
+                      <stop offset="5%" stopColor="#FFFFFF" stopOpacity={0.25} />
+                      <stop offset="95%" stopColor="#FFFFFF" stopOpacity={0.0} />
                     </linearGradient>
                     <linearGradient id="sentimentGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="5%" stopColor="#38BDF8" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#38BDF8" stopOpacity={0.0} />
+                      <stop offset="5%" stopColor="#10B981" stopOpacity={0.2} />
+                      <stop offset="95%" stopColor="#10B981" stopOpacity={0.0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                  <XAxis dataKey="date" stroke="#646873" fontSize={11} tickLine={false} />
-                  <YAxis stroke="#646873" fontSize={11} tickLine={false} />
+                  <CartesianGrid strokeDasharray="2 2" stroke="rgba(255,255,255,0.04)" />
+                  <XAxis dataKey="date" stroke="#64748B" fontSize={11} tickLine={false} />
+                  <YAxis stroke="#64748B" fontSize={11} tickLine={false} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: '#0E1017',
-                      borderColor: 'rgba(255,255,255,0.1)',
-                      borderRadius: 6,
+                      borderColor: 'rgba(255,255,255,0.12)',
+                      borderRadius: 4,
                       fontSize: 12,
-                      color: '#F5F5F7',
+                      color: '#FFFFFF',
                     }}
                   />
                   <Area
                     type="monotone"
                     dataKey="mentions"
                     name="Signal Ingested"
-                    stroke="#8B5CF6"
+                    stroke="#FFFFFF"
                     strokeWidth={2}
                     fillOpacity={1}
                     fill="url(#mentionsGrad)"
@@ -257,8 +252,8 @@ export function ProductPreviewSection({ onExploreApp }: { onExploreApp: () => vo
                     type="monotone"
                     dataKey="sentiment"
                     name="Resolution %"
-                    stroke="#38BDF8"
-                    strokeWidth={2}
+                    stroke="#10B981"
+                    strokeWidth={1.5}
                     fillOpacity={1}
                     fill="url(#sentimentGrad)"
                   />
@@ -271,24 +266,24 @@ export function ProductPreviewSection({ onExploreApp }: { onExploreApp: () => vo
           <div className="preview-chart-box">
             <div className="preview-chart-header">
               <h4>Top Recurring Friction Themes</h4>
-              <span style={{ fontSize: 11, color: '#8A8F98' }}>Channel: {channel}</span>
+              <span style={{ fontSize: 11, color: '#64748B', fontFamily: 'monospace' }}>Channel: {channel}</span>
             </div>
             <div style={{ width: '100%', height: 260 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={themeData} layout="vertical" margin={{ top: 10, right: 20, left: 20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={false} />
-                  <XAxis type="number" stroke="#646873" fontSize={11} tickLine={false} />
-                  <YAxis type="category" dataKey="name" stroke="#8A8F98" fontSize={11} tickLine={false} width={110} />
+                  <CartesianGrid strokeDasharray="2 2" stroke="rgba(255,255,255,0.04)" horizontal={false} />
+                  <XAxis type="number" stroke="#64748B" fontSize={11} tickLine={false} />
+                  <YAxis type="category" dataKey="name" stroke="#94A3B8" fontSize={11} tickLine={false} width={110} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: '#0E1017',
-                      borderColor: 'rgba(255,255,255,0.1)',
-                      borderRadius: 6,
+                      borderColor: 'rgba(255,255,255,0.12)',
+                      borderRadius: 4,
                       fontSize: 12,
-                      color: '#F5F5F7',
+                      color: '#FFFFFF',
                     }}
                   />
-                  <Bar dataKey="count" name="Mention Frequency" radius={[0, 4, 4, 0]}>
+                  <Bar dataKey="count" name="Mention Frequency" radius={[0, 2, 2, 0]}>
                     {themeData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
@@ -299,12 +294,14 @@ export function ProductPreviewSection({ onExploreApp }: { onExploreApp: () => vo
           </div>
         </div>
 
-        {/* Interactive Issues Table & Action Drawer */}
-        <div style={{ padding: '0 24px 24px', display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 20 }}>
-          <div style={{ background: '#131620', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: 16 }}>
+        {/* Prioritized Issues Table & Action Drawer */}
+        <div style={{ padding: '0 20px 20px', display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 16 }}>
+          <div style={{ background: '#141722', border: '1px solid var(--vanta-border)', borderRadius: 6, padding: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: '#F5F5F7' }}>Prioritized Issues (Deterministic Rank)</span>
-              <span style={{ fontSize: 11, color: '#8A8F98' }}>Click row to inspect citation</span>
+              <span style={{ fontSize: 12.5, fontWeight: 600, color: '#FFFFFF', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Prioritized Issues (Deterministic Rank)
+              </span>
+              <span style={{ fontSize: 11, color: '#64748B' }}>Click row to inspect citation</span>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -315,41 +312,42 @@ export function ProductPreviewSection({ onExploreApp }: { onExploreApp: () => vo
                     key={iss.id}
                     onClick={() => setSelectedIssue(iss)}
                     style={{
-                      background: isSelected ? '#181C28' : 'rgba(255,255,255,0.02)',
-                      border: `1px solid ${isSelected ? '#8B5CF6' : 'rgba(255,255,255,0.06)'}`,
-                      borderRadius: 6,
+                      background: isSelected ? '#1A1E2C' : 'rgba(255,255,255,0.01)',
+                      border: `1px solid ${isSelected ? '#FFFFFF' : 'rgba(255,255,255,0.06)'}`,
+                      borderRadius: 4,
                       padding: '10px 14px',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      transition: 'all .15s ease',
+                      transition: 'all .12s ease',
                     }}
                   >
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: '#A78BFA' }}>{iss.id}</span>
-                        <strong style={{ fontSize: 13, color: '#F5F5F7' }}>{iss.title}</strong>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: '#94A3B8', fontFamily: 'monospace' }}>{iss.id}</span>
+                        <strong style={{ fontSize: 13, color: '#FFFFFF' }}>{iss.title}</strong>
                         <span
                           style={{
                             fontSize: 10,
-                            padding: '1px 6px',
-                            borderRadius: 4,
-                            background: iss.severity === 'Critical' ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.15)',
-                            color: iss.severity === 'Critical' ? '#F87171' : '#FBBF24',
+                            padding: '1px 5px',
+                            borderRadius: 3,
+                            background: iss.severity === 'Critical' ? 'rgba(239,68,68,0.12)' : 'rgba(245,158,11,0.12)',
+                            color: iss.severity === 'Critical' ? '#EF4444' : '#F59E0B',
+                            fontFamily: 'monospace',
                           }}
                         >
-                          {iss.severity}
+                          {iss.severity.toUpperCase()}
                         </span>
                       </div>
-                      <small style={{ color: '#8A8F98', fontSize: 11 }}>
+                      <small style={{ color: '#64748B', fontSize: 11 }}>
                         {iss.affected} enterprise accounts affected · Assigned to {iss.owner}
                       </small>
                     </div>
 
                     <div style={{ textAlign: 'right' }}>
-                      <span style={{ fontSize: 18, fontWeight: 700, color: '#38BDF8' }}>{iss.priority}</span>
-                      <small style={{ display: 'block', fontSize: 9.5, color: '#646873', textTransform: 'uppercase' }}>Score</small>
+                      <span style={{ fontSize: 18, fontWeight: 700, color: '#FFFFFF', fontFamily: 'monospace' }}>{iss.priority}</span>
+                      <small style={{ display: 'block', fontSize: 9, color: '#64748B', textTransform: 'uppercase' }}>Score</small>
                     </div>
                   </div>
                 )
@@ -357,28 +355,27 @@ export function ProductPreviewSection({ onExploreApp }: { onExploreApp: () => vo
             </div>
           </div>
 
-          {/* Evidence Citation Inspector Card */}
-          <div style={{ background: '#131620', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: 18, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          {/* Evidence Citation Card */}
+          <div style={{ background: '#141722', border: '1px solid var(--vanta-border)', borderRadius: 6, padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#38BDF8', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', marginBottom: 8 }}>
-                <Sparkles size={13} />
-                Verbatim Customer Evidence
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#94A3B8', fontSize: 10.5, fontWeight: 700, textTransform: 'uppercase', marginBottom: 8, fontFamily: 'monospace' }}>
+                Verbatim Customer Audit
               </div>
-              <h5 style={{ fontSize: 14, fontWeight: 600, color: '#F5F5F7', margin: '0 0 10px' }}>
+              <h5 style={{ fontSize: 13.5, fontWeight: 600, color: '#FFFFFF', margin: '0 0 10px' }}>
                 {selectedIssue.title}
               </h5>
-              <p style={{ fontSize: 13, color: '#8A8F98', fontStyle: 'italic', background: 'rgba(255,255,255,0.02)', borderLeft: '2px solid #8B5CF6', padding: '10px 12px', borderRadius: '0 6px 6px 0', margin: 0 }}>
+              <p style={{ fontSize: 13, color: '#94A3B8', fontStyle: 'italic', background: 'rgba(255,255,255,0.02)', borderLeft: '2px solid #FFFFFF', padding: '10px 12px', borderRadius: '0 4px 4px 0', margin: 0 }}>
                 {selectedIssue.quote}
               </p>
 
               <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10, fontSize: 11.5 }}>
                 <div style={{ background: 'rgba(255,255,255,0.02)', padding: '6px 10px', borderRadius: 4 }}>
-                  <span style={{ color: '#646873', display: 'block' }}>Impact Area</span>
-                  <strong style={{ color: '#F5F5F7' }}>{selectedIssue.area}</strong>
+                  <span style={{ color: '#64748B', display: 'block' }}>Impact Area</span>
+                  <strong style={{ color: '#FFFFFF' }}>{selectedIssue.area}</strong>
                 </div>
                 <div style={{ background: 'rgba(255,255,255,0.02)', padding: '6px 10px', borderRadius: 4 }}>
-                  <span style={{ color: '#646873', display: 'block' }}>Deterministic Action</span>
-                  <strong style={{ color: '#34D399' }}>Deploy Progress Rail</strong>
+                  <span style={{ color: '#64748B', display: 'block' }}>Deterministic Action</span>
+                  <strong style={{ color: '#10B981' }}>Deploy Progress Rail</strong>
                 </div>
               </div>
             </div>
@@ -388,7 +385,7 @@ export function ProductPreviewSection({ onExploreApp }: { onExploreApp: () => vo
               onClick={onExploreApp}
               style={{ width: '100%', justifyContent: 'center', marginTop: 16 }}
             >
-              Open Full Analysis in Workspace <ArrowRight size={14} />
+              Open Full Analysis in Workspace <ArrowRight size={13} />
             </button>
           </div>
         </div>

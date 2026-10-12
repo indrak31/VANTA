@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { X, Play, ArrowRight, CheckCircle2, Sparkles, Layers, SlidersHorizontal, FileBarChart } from 'lucide-react'
+import { X, ArrowRight, Check, Sparkles, Layers, SlidersHorizontal, FileBarChart } from 'lucide-react'
 
 interface DemoStep {
   time: string
@@ -77,11 +77,11 @@ export function DemoModal({
       <div className="demo-modal-card" onClick={(e) => e.stopPropagation()}>
         <div className="demo-modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#8B5CF6', boxShadow: '0 0 10px #8B5CF6' }} />
-            <span className="demo-modal-title">Vanta Signal OS · Interactive Product Walkthrough</span>
+            <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#10B981' }} />
+            <span className="demo-modal-title">Vanta Signal OS · Architecture Walkthrough</span>
           </div>
           <button className="demo-modal-close" onClick={onClose} aria-label="Close demo">
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
@@ -89,23 +89,23 @@ export function DemoModal({
           {/* Simulated Screen Preview */}
           <div className="demo-screen-preview">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#38BDF8', fontSize: 12, fontWeight: 600 }}>
-                <StepIcon size={16} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#94A3B8', fontSize: 11, fontWeight: 600, fontFamily: 'monospace' }}>
+                <StepIcon size={14} />
                 CHAPTER {activeStepIndex + 1} OF 5 · {step.time}
               </div>
               <button
                 className="convergence-replay-btn"
                 onClick={() => setIsPlaying(!isPlaying)}
               >
-                {isPlaying ? 'Pause Autoplay' : 'Resume Play'}
+                {isPlaying ? 'Pause' : 'Resume'}
               </button>
             </div>
 
             <div style={{ textAlign: 'center', padding: '24px 20px' }}>
-              <h3 style={{ fontSize: 24, fontWeight: 700, color: '#F5F5F7', margin: '0 0 12px' }}>
+              <h3 style={{ fontSize: 22, fontWeight: 700, color: '#FFFFFF', margin: '0 0 10px', letterSpacing: '-0.02em' }}>
                 {step.title}
               </h3>
-              <p style={{ fontSize: 15, color: '#8A8F98', maxWidth: 540, margin: '0 auto 20px', lineHeight: 1.5 }}>
+              <p style={{ fontSize: 14.5, color: '#94A3B8', maxWidth: 520, margin: '0 auto 18px', lineHeight: 1.5 }}>
                 {step.description}
               </p>
               <div
@@ -113,23 +113,24 @@ export function DemoModal({
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: 8,
-                  background: 'rgba(139, 92, 246, 0.12)',
-                  border: '1px solid rgba(139, 92, 246, 0.3)',
-                  padding: '8px 16px',
-                  borderRadius: 6,
-                  color: '#A78BFA',
-                  fontSize: 13,
+                  background: 'rgba(255, 255, 255, 0.04)',
+                  border: '1px solid var(--vanta-border)',
+                  padding: '6px 14px',
+                  borderRadius: 4,
+                  color: '#FFFFFF',
+                  fontSize: 12.5,
                   fontWeight: 500,
+                  fontFamily: 'monospace',
                 }}
               >
-                <CheckCircle2 size={16} color="#34D399" />
+                <Check size={14} color="#10B981" />
                 {step.previewHighlight}
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 14 }}>
-              <span style={{ fontSize: 12, color: '#646873' }}>
-                Press any step below to jump directly to that chapter
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--vanta-border)', paddingTop: 12 }}>
+              <span style={{ fontSize: 11.5, color: '#64748B' }}>
+                Click any chapter to jump directly to that module
               </span>
               <button
                 className="vanta-btn-primary"
@@ -138,7 +139,7 @@ export function DemoModal({
                   onLaunchApp()
                 }}
               >
-                Open Live Workspace <ArrowRight size={14} />
+                Launch Workspace <ArrowRight size={13} />
               </button>
             </div>
           </div>

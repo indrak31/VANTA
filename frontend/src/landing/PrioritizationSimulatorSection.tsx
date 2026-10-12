@@ -1,11 +1,6 @@
 import { useState, useMemo } from 'react'
 import {
   SlidersHorizontal,
-  TrendingUp,
-  ArrowUp,
-  ArrowDown,
-  CheckCircle2,
-  Sparkles,
   Info,
 } from 'lucide-react'
 
@@ -35,7 +30,7 @@ const initialIssues: SimIssue[] = [
     severity: 98,
     growth: 82,
     recency: 94,
-    businessImpact: 96, // Huge enterprise ARR
+    businessImpact: 96,
     baselineRank: 1,
     affectedAccounts: 22,
     evidenceQuote: 'Okta enterprise login loops infinitely for our 1,400 employees when sessions expire.',
@@ -45,7 +40,7 @@ const initialIssues: SimIssue[] = [
     title: 'Workspace query timeout on datasets > 50k rows',
     area: 'Core Workspace',
     owner: 'Ibrahim Shah',
-    frequency: 92, // Very frequent
+    frequency: 92,
     severity: 78,
     growth: 65,
     recency: 70,
@@ -75,7 +70,7 @@ const initialIssues: SimIssue[] = [
     owner: 'Maya Chen',
     frequency: 45,
     severity: 70,
-    growth: 90, // Fast growing recently
+    growth: 90,
     recency: 88,
     businessImpact: 89,
     baselineRank: 4,
@@ -126,7 +121,7 @@ export function PrioritizationSimulatorSection() {
 
     return scored.map((item, index) => {
       const currentRank = index + 1
-      const delta = item.baselineRank - currentRank // positive means climbed up
+      const delta = item.baselineRank - currentRank
       return {
         ...item,
         currentRank,
@@ -137,18 +132,18 @@ export function PrioritizationSimulatorSection() {
 
   const explanation = useMemo(() => {
     if (wBusinessImpact >= 35) {
-      return 'Prioritizing Business Impact ARR elevates enterprise-tier blockers (like SAML SSO and EU Billing Compliance) over raw mention frequency.'
+      return 'Prioritizing Business Impact elevates enterprise accounts ($420k ARR) and compliance blockers over raw ticket volume.'
     }
     if (wSeverity >= 35) {
-      return 'Prioritizing Severity pushes critical failure modes to the top, safeguarding core customer uptime and trust.'
+      return 'Prioritizing Severity elevates critical auth loops and crash risks to safeguard core system reliability.'
     }
     if (wFrequency >= 35) {
-      return 'Prioritizing Frequency highlights widespread operational friction affecting the largest number of day-to-day users.'
+      return 'Prioritizing Frequency targets day-to-day workflow friction affecting the broadest base of users.'
     }
     if (wGrowth >= 25) {
-      return 'Prioritizing Growth Velocity detects emerging issues early before they scale into systemic enterprise complaints.'
+      return 'Prioritizing Growth Velocity surfaces rapidly accelerating feedback patterns before they compound into renewals risk.'
     }
-    return 'Balanced multi-factor weighting distributes priority objectively across urgency, reach, and financial risk.'
+    return 'Balanced multi-factor weighting distributes priority objectively across urgency, reach, and financial exposure.'
   }, [wFrequency, wSeverity, wGrowth, wRecency, wBusinessImpact])
 
   const selectedIssue = rankedIssues.find((i) => i.id === activeIssueId) || rankedIssues[0]
@@ -156,7 +151,7 @@ export function PrioritizationSimulatorSection() {
   return (
     <section className="landing-section" id="how-it-works">
       <div className="section-header">
-        <span className="section-eyebrow">Deterministic Decision Engine</span>
+        <span className="section-eyebrow">Deterministic Decision Matrix</span>
         <h2 className="section-title">See what matters. Change what happens next.</h2>
         <p className="section-subtitle">
           Customer priorities shouldn’t be a black box. Adjust the decision weights below to recalibrate issue rankings in real-time using our verifiable, multi-factor priority algorithm.
@@ -169,7 +164,7 @@ export function PrioritizationSimulatorSection() {
           <div className="simulator-controls-panel">
             <div className="simulator-formula-box">
               <span>PRIORITY = ∑(factor × weight) ÷ ∑(weights)</span>
-              <span style={{ color: '#38BDF8' }}>100% REPRODUCIBLE</span>
+              <span style={{ color: '#10B981' }}>100% REPRODUCIBLE</span>
             </div>
 
             {/* Slider 1: Frequency */}
@@ -268,18 +263,18 @@ export function PrioritizationSimulatorSection() {
               }}
               style={{ justifyContent: 'center', marginTop: 4 }}
             >
-              Reset to Recommended Baseline
+              Reset to Baseline Weights
             </button>
           </div>
 
           {/* Results Panel */}
           <div className="simulator-results-panel">
             <div className="simulator-meta-notice">
-              <Info size={16} color="#A78BFA" style={{ flexShrink: 0 }} />
+              <Info size={15} color="#94A3B8" style={{ flexShrink: 0 }} />
               <span>{explanation}</span>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {rankedIssues.map((iss) => {
                 const isActive = iss.id === selectedIssue.id
                 return (
@@ -291,17 +286,17 @@ export function PrioritizationSimulatorSection() {
                     <div className="sim-rank-box">
                       <span className="sim-rank-num">#{iss.currentRank}</span>
                       {iss.rankDelta > 0 && (
-                        <span className="sim-rank-delta" style={{ color: '#34D399' }}>
+                        <span className="sim-rank-delta" style={{ color: '#10B981' }}>
                           ▲ +{iss.rankDelta}
                         </span>
                       )}
                       {iss.rankDelta < 0 && (
-                        <span className="sim-rank-delta" style={{ color: '#F87171' }}>
+                        <span className="sim-rank-delta" style={{ color: '#EF4444' }}>
                           ▼ {iss.rankDelta}
                         </span>
                       )}
                       {iss.rankDelta === 0 && (
-                        <span className="sim-rank-delta" style={{ color: '#8A8F98' }}>
+                        <span className="sim-rank-delta" style={{ color: '#64748B' }}>
                           —
                         </span>
                       )}
@@ -326,11 +321,11 @@ export function PrioritizationSimulatorSection() {
             {/* Selected Issue Verbatim Citation Card */}
             <div
               style={{
-                background: '#131620',
-                border: '1px solid var(--vanta-border-accent)',
-                borderRadius: 8,
-                padding: 16,
-                marginTop: 6,
+                background: '#141722',
+                border: '1px solid var(--vanta-border)',
+                borderRadius: 6,
+                padding: 14,
+                marginTop: 4,
               }}
             >
               <div
@@ -343,23 +338,24 @@ export function PrioritizationSimulatorSection() {
               >
                 <span
                   style={{
-                    fontSize: 11,
+                    fontSize: 10.5,
                     fontWeight: 700,
-                    color: '#A78BFA',
+                    color: '#94A3B8',
                     letterSpacing: '0.06em',
                     textTransform: 'uppercase',
+                    fontFamily: 'monospace',
                   }}
                 >
-                  Selected Issue Verbatim Evidence ({selectedIssue.id})
+                  Selected Issue Audit Citation ({selectedIssue.id})
                 </span>
-                <span style={{ fontSize: 11, color: '#38BDF8', fontWeight: 600 }}>
+                <span style={{ fontSize: 11, color: '#FFFFFF', fontWeight: 600 }}>
                   Owner: {selectedIssue.owner}
                 </span>
               </div>
               <p
                 style={{
-                  fontSize: 13,
-                  color: '#F5F5F7',
+                  fontSize: 12.5,
+                  color: '#CBD5E1',
                   fontStyle: 'italic',
                   margin: 0,
                   lineHeight: 1.45,

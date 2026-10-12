@@ -1,15 +1,7 @@
 import { useState } from 'react'
 import {
-  Layers,
-  Sparkles,
-  GitBranch,
-  CheckCircle2,
+  Check,
   Database,
-  Terminal,
-  Activity,
-  ArrowRight,
-  Shield,
-  Zap,
 } from 'lucide-react'
 
 // Section A: Semantic Clusters
@@ -112,22 +104,22 @@ export function StorytellingSection() {
             <p className="story-copy">
               Customer feedback arrives in fragments: angry tweets, hurried support tickets, sales call transcripts, and quiet survey ratings. Vanta’s semantic engine continuously embeds and groups related customer intent into coherent, quantifiable friction clusters.
             </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#38BDF8' }}>
-                <CheckCircle2 size={16} /> 0% keyword reliance
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 6 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5, color: '#FFFFFF' }}>
+                <Check size={14} color="#10B981" /> 0% keyword reliance
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#A78BFA' }}>
-                <CheckCircle2 size={16} /> 100% vector semantic clustering
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5, color: '#94A3B8' }}>
+                <Check size={14} color="#10B981" /> Vector semantic clustering
               </div>
             </div>
           </div>
 
           <div className="story-visual-box">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: '#A78BFA', textTransform: 'uppercase' }}>
-                Active Friction Clusters (Click to Inspect)
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', fontFamily: 'monospace' }}>
+                Friction Clusters (Click to Inspect)
               </span>
-              <span style={{ fontSize: 11, color: '#8A8F98' }}>{activeCluster.similarity}</span>
+              <span style={{ fontSize: 11, color: '#64748B', fontFamily: 'monospace' }}>{activeCluster.similarity}</span>
             </div>
 
             <div className="clusters-grid">
@@ -165,12 +157,12 @@ export function StorytellingSection() {
             <div className="evidence-inspector">
               <div className="evidence-header">
                 <span className="evidence-source-tag">Verbatim Customer Audit Trail</span>
-                <span style={{ fontSize: 11, color: '#34D399', fontWeight: 600 }}>
+                <span style={{ fontSize: 11, color: '#10B981', fontWeight: 600, fontFamily: 'monospace' }}>
                   {activeDecision.confidence}
                 </span>
               </div>
 
-              <div style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 4 }}>
                 {decisionIssues.map((d) => (
                   <button
                     key={d.id}
@@ -187,18 +179,18 @@ export function StorytellingSection() {
               </div>
 
               <div className="evidence-meta-row">
-                <span>Account: <strong style={{ color: '#F5F5F7' }}>{activeDecision.account}</strong></span>
-                <span>Channel: <strong style={{ color: '#F5F5F7' }}>{activeDecision.channel}</strong></span>
+                <span>Account: <strong style={{ color: '#FFFFFF' }}>{activeDecision.account}</strong></span>
+                <span>Channel: <strong style={{ color: '#FFFFFF' }}>{activeDecision.channel}</strong></span>
               </div>
 
-              <div style={{ background: 'rgba(139, 92, 246, 0.08)', border: '1px solid rgba(139, 92, 246, 0.25)', borderRadius: 6, padding: 12 }}>
-                <span style={{ fontSize: 11, fontWeight: 700, color: '#A78BFA', textTransform: 'uppercase', display: 'block', marginBottom: 2 }}>
+              <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--vanta-border)', borderRadius: 5, padding: 12 }}>
+                <span style={{ fontSize: 10.5, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', display: 'block', marginBottom: 2, fontFamily: 'monospace' }}>
                   Deterministic Recommendation
                 </span>
-                <span style={{ fontSize: 13, color: '#F5F5F7', fontWeight: 600 }}>
+                <span style={{ fontSize: 13, color: '#FFFFFF', fontWeight: 600 }}>
                   {activeDecision.recommendation}
                 </span>
-                <small style={{ display: 'block', color: '#38BDF8', marginTop: 4 }}>
+                <small style={{ display: 'block', color: '#10B981', marginTop: 4 }}>
                   Expected Impact: {activeDecision.impact}
                 </small>
               </div>
@@ -211,7 +203,7 @@ export function StorytellingSection() {
             <p className="story-copy">
               Recommendations in Vanta are never synthesized out of thin air. Every proposed product decision links directly to the exact verbatim customer interviews, support tickets, and telemetry records that triggered it.
             </p>
-            <p className="story-copy" style={{ color: '#8A8F98' }}>
+            <p className="story-copy" style={{ color: '#64748B' }}>
               Product leaders can walk into planning meetings with irrefutable proof: what customer said it, how many accounts share the problem, and the quantifiable ARR impact of fixing it.
             </p>
           </div>
@@ -228,8 +220,8 @@ export function StorytellingSection() {
               Prioritizing an issue is only step one. Vanta tracks issues as they transition into development, measure deployment impact against customer feedback, and verify whether subsequent mentions decrease.
             </p>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 12 }}>
-              <span style={{ fontSize: 12, color: '#8A8F98' }}>Model projection:</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 8 }}>
+              <span style={{ fontSize: 11.5, color: '#64748B' }}>Model projection:</span>
               <button
                 className={`preview-filter-btn ${lifecycleMode === 'measured' ? 'active' : ''}`}
                 onClick={() => setLifecycleMode('measured')}
@@ -251,21 +243,21 @@ export function StorytellingSection() {
                 <span className="step-num">Stage 01</span>
                 <span className="step-title">Detect & Cluster</span>
                 <span className="step-sub">31 mentions grouped into #AUTH-01</span>
-                <span style={{ fontSize: 10, color: '#34D399', fontWeight: 600 }}>Completed</span>
+                <span style={{ fontSize: 10, color: '#10B981', fontWeight: 600 }}>Completed</span>
               </div>
 
               <div className="lifecycle-step completed">
                 <span className="step-num">Stage 02</span>
                 <span className="step-title">Prioritize & Assign</span>
                 <span className="step-sub">Rank #1 · Priority 94.2/100 · Maya Chen</span>
-                <span style={{ fontSize: 10, color: '#34D399', fontWeight: 600 }}>Completed</span>
+                <span style={{ fontSize: 10, color: '#10B981', fontWeight: 600 }}>Completed</span>
               </div>
 
               <div className="lifecycle-step active">
                 <span className="step-num">Stage 03</span>
                 <span className="step-title">Deploy Patch</span>
                 <span className="step-sub">v3.14.2 OAuth token refresh fix shipped</span>
-                <span style={{ fontSize: 10, color: '#38BDF8', fontWeight: 600 }}>Active</span>
+                <span style={{ fontSize: 10, color: '#FFFFFF', fontWeight: 600 }}>Active</span>
               </div>
 
               <div className="lifecycle-step">
@@ -276,7 +268,7 @@ export function StorytellingSection() {
                     ? 'Subsequent SSO tickets dropped by 84%'
                     : 'Projected -75% ticket volume reduction'}
                 </span>
-                <span style={{ fontSize: 10, color: '#A78BFA', fontWeight: 600 }}>
+                <span style={{ fontSize: 10, color: '#94A3B8', fontWeight: 600 }}>
                   {lifecycleMode === 'measured' ? 'Verified in Oct' : 'Simulated Forecast'}
                 </span>
               </div>
@@ -290,10 +282,10 @@ export function StorytellingSection() {
         <div className="story-block reversed" id="adaption">
           <div className="story-visual-box">
             <div className="adaption-dashboard-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <Database size={16} color="#38BDF8" />
-                  <strong style={{ fontSize: 13.5, color: '#F5F5F7' }}>Adaption Engine Architecture</strong>
+                  <Database size={15} color="#94A3B8" />
+                  <strong style={{ fontSize: 13, color: '#FFFFFF' }}>Adaption Engine Architecture</strong>
                 </div>
                 <span className="convergence-status-pill">
                   <span className="status-dot-active" />
@@ -312,19 +304,19 @@ export function StorytellingSection() {
                 </div>
                 <div className="adaption-meta-item">
                   <small>Clustering Precision</small>
-                  <strong style={{ color: '#34D399' }}>94.2% (+18.4%)</strong>
+                  <strong style={{ color: '#10B981' }}>94.2% (+18.4%)</strong>
                 </div>
                 <div className="adaption-meta-item">
                   <small>Citation Grounding</small>
-                  <strong style={{ color: '#38BDF8' }}>99.1% Verbatim</strong>
+                  <strong style={{ color: '#FFFFFF' }}>99.1% Verbatim</strong>
                 </div>
               </div>
 
               <div className="adaption-pipeline-preview">
                 <div>$ adaption pipeline --dataset ds_vanta_signals_2026 --op semantic_cluster</div>
-                <div style={{ color: '#34D399' }}>[✓] Extracted 1,482 customer signal embeddings (cosine threshold: 0.88)</div>
-                <div style={{ color: '#38BDF8' }}>[✓] Calibrated multi-factor priority weights against historical churn logs</div>
-                <div style={{ color: '#F5F5F7' }}>[✓] Evaluation completed: 0 hallucinations detected across 100% of citations</div>
+                <div style={{ color: '#10B981' }}>[✓] Extracted 1,482 customer signal embeddings (cosine threshold: 0.88)</div>
+                <div style={{ color: '#FFFFFF' }}>[✓] Calibrated multi-factor priority weights against historical churn logs</div>
+                <div style={{ color: '#94A3B8' }}>[✓] Evaluation completed: 0 hallucinations detected across 100% of citations</div>
               </div>
             </div>
           </div>
@@ -335,7 +327,7 @@ export function StorytellingSection() {
             <p className="story-copy">
               Generic LLMs guess user priorities based on web text. Vanta integrates with Adaption to fine-tune semantic understanding directly on your organization’s genuine customer vernacular, acronyms, and product architecture.
             </p>
-            <p className="story-copy" style={{ color: '#8A8F98' }}>
+            <p className="story-copy" style={{ color: '#64748B' }}>
               Runs execute reproducibly with documented evaluation benchmarks, preventing hallucinated customer quotes and ensuring strict citation fidelity.
             </p>
           </div>

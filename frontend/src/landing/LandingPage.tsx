@@ -2,14 +2,13 @@ import { useState, useEffect } from 'react'
 import {
   ArrowRight,
   Play,
-  CheckCircle2,
+  Check,
   Shield,
   Layers,
   Database,
   Terminal,
   Activity,
   SlidersHorizontal,
-  Sparkles,
   Zap,
 } from 'lucide-react'
 import { SignalConvergenceVisual } from './SignalConvergenceVisual'
@@ -25,7 +24,7 @@ export function LandingPage({ onLaunchApp }: { onLaunchApp: () => void }) {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 30)
+      setScrolled(window.scrollY > 20)
     }
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
@@ -33,21 +32,20 @@ export function LandingPage({ onLaunchApp }: { onLaunchApp: () => void }) {
 
   return (
     <div className="landing-container">
-      {/* Background visual atmosphere */}
+      {/* Precision technical grid */}
       <div className="landing-bg-grid" />
-      <div className="landing-bg-glow" />
 
       {/* Navigation */}
       <header className={`landing-navbar ${scrolled ? 'scrolled' : ''}`}>
         <a href="#top" className="landing-brand">
           <img src="/vanta-brand.png" alt="VANTA" className="landing-brand-logo" />
-          <span className="landing-brand-tag">INTELLIGENCE</span>
+          <span className="landing-brand-tag">OS v0.1</span>
         </a>
 
         <nav className="landing-nav-links">
           <a href="#product" className="landing-nav-link">Product</a>
-          <a href="#how-it-works" className="landing-nav-link">How it works</a>
-          <a href="#use-cases" className="landing-nav-link">Use cases</a>
+          <a href="#how-it-works" className="landing-nav-link">Prioritization</a>
+          <a href="#use-cases" className="landing-nav-link">Evidence</a>
           <a href="#adaption" className="landing-nav-link">Adaption</a>
         </nav>
 
@@ -56,13 +54,13 @@ export function LandingPage({ onLaunchApp }: { onLaunchApp: () => void }) {
             className="vanta-btn-secondary"
             onClick={() => setDemoModalOpen(true)}
           >
-            <Play size={13} fill="currentColor" /> Watch demo
+            <Play size={12} fill="currentColor" /> Watch demo
           </button>
           <button
             className="vanta-btn-primary"
             onClick={onLaunchApp}
           >
-            Explore Vanta <ArrowRight size={14} />
+            Explore Vanta <ArrowRight size={13} />
           </button>
         </div>
       </header>
@@ -78,8 +76,7 @@ export function LandingPage({ onLaunchApp }: { onLaunchApp: () => void }) {
 
           <h1 className="hero-headline">
             Every signal.
-            <br />
-            <span className="hero-headline-accent">One clear direction.</span>
+            <span className="hero-headline-sub">One clear direction.</span>
           </h1>
 
           <p className="hero-copy">
@@ -88,20 +85,20 @@ export function LandingPage({ onLaunchApp }: { onLaunchApp: () => void }) {
 
           <div className="hero-ctas">
             <button className="vanta-btn-primary" onClick={onLaunchApp}>
-              Explore Vanta <ArrowRight size={15} />
+              Explore Vanta <ArrowRight size={14} />
             </button>
             <button
               className="vanta-btn-secondary"
               onClick={() => setDemoModalOpen(true)}
             >
-              <Play size={14} fill="currentColor" /> Watch demo
+              <Play size={13} fill="currentColor" /> Watch demo
             </button>
           </div>
 
           {/* Verifiable Capability Strip */}
           <div className="hero-proof-strip">
             <div className="proof-item">
-              <Zap size={18} className="proof-item-icon" />
+              <Zap size={16} className="proof-item-icon" />
               <div className="proof-item-text">
                 <span className="proof-item-label">4 Ingestion Channels</span>
                 <span className="proof-item-sub">Zendesk, App Store, Discord, Intercom</span>
@@ -109,15 +106,15 @@ export function LandingPage({ onLaunchApp }: { onLaunchApp: () => void }) {
             </div>
 
             <div className="proof-item">
-              <SlidersHorizontal size={18} className="proof-item-icon" />
+              <SlidersHorizontal size={16} className="proof-item-icon" />
               <div className="proof-item-text">
                 <span className="proof-item-label">Deterministic Priority</span>
-                <span className="proof-item-sub">Formula-driven 0-100 scoring</span>
+                <span className="proof-item-sub">Reproducible 0–100 multi-factor formula</span>
               </div>
             </div>
 
             <div className="proof-item">
-              <Database size={18} className="proof-item-icon" />
+              <Database size={16} className="proof-item-icon" />
               <div className="proof-item-text">
                 <span className="proof-item-label">Adaption Pipeline</span>
                 <span className="proof-item-sub">Domain semantic fine-tuning</span>
@@ -125,16 +122,16 @@ export function LandingPage({ onLaunchApp }: { onLaunchApp: () => void }) {
             </div>
 
             <div className="proof-item">
-              <Shield size={18} className="proof-item-icon" />
+              <Shield size={16} className="proof-item-icon" />
               <div className="proof-item-text">
                 <span className="proof-item-label">100% Traceable Citations</span>
-                <span className="proof-item-sub">Direct verbatim customer evidence</span>
+                <span className="proof-item-sub">Verbatim source customer proof</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right Column: Signature Animated Signal Convergence Visual */}
+        {/* Right Column: Mission Control Signal Convergence Engine */}
         <div className="hero-visual">
           <SignalConvergenceVisual />
         </div>
@@ -149,38 +146,38 @@ export function LandingPage({ onLaunchApp }: { onLaunchApp: () => void }) {
       {/* Product Storytelling Narrative */}
       <StorytellingSection />
 
-      {/* Final Cinematic CTA Section */}
+      {/* Final Clean CTA Section */}
       <section className="final-cta-section">
         <div className="final-cta-box">
-          <span className="hero-eyebrow">READY FOR ENTERPRISE DEPLOYMENT</span>
+          <span className="hero-eyebrow">DECISION GOVERNANCE</span>
           <h2 className="final-cta-title">Turn feedback into forward momentum.</h2>
           <p className="final-cta-copy">
             Bring customer signals together. Find the issues that matter. Make better-informed decisions.
           </p>
           <div className="final-cta-actions">
             <button className="vanta-btn-primary" onClick={onLaunchApp}>
-              Explore Vanta <ArrowRight size={15} />
+              Explore Vanta <ArrowRight size={14} />
             </button>
             <button
               className="vanta-btn-secondary"
               onClick={() => setDemoModalOpen(true)}
             >
-              <Play size={14} fill="currentColor" /> Watch demo
+              <Play size={13} fill="currentColor" /> Watch demo
             </button>
           </div>
 
           <div className="final-cta-badges">
             <div className="final-badge-item">
-              <CheckCircle2 size={15} color="#34D399" />
+              <Check size={14} color="#10B981" />
               <span>Zero Hallucination Scoring</span>
             </div>
             <div className="final-badge-item">
-              <CheckCircle2 size={15} color="#38BDF8" />
-              <span>Sub-Second Deterministic Rankings</span>
+              <Check size={14} color="#10B981" />
+              <span>Deterministic Multi-Factor Ranking</span>
             </div>
             <div className="final-badge-item">
-              <CheckCircle2 size={15} color="#A78BFA" />
-              <span>SOC2 Type II Aligned</span>
+              <Check size={14} color="#10B981" />
+              <span>Enterprise SOC2 Aligned</span>
             </div>
           </div>
         </div>
@@ -189,7 +186,7 @@ export function LandingPage({ onLaunchApp }: { onLaunchApp: () => void }) {
       {/* Minimalist Enterprise Footer */}
       <footer className="landing-footer">
         <div className="footer-left">
-          <img src="/vanta-brand.png" alt="VANTA" style={{ height: 20 }} />
+          <img src="/vanta-brand.png" alt="VANTA" style={{ height: 18 }} />
           <span className="footer-copy">
             © 2026 Vanta Systems Inc. Every signal. One clear direction.
           </span>
@@ -211,11 +208,11 @@ export function LandingPage({ onLaunchApp }: { onLaunchApp: () => void }) {
 
         <div className="footer-status-indicator">
           <span className="status-dot-active" />
-          <span>All Systems Operational · Gateway Active</span>
+          <span>Gateway Active · 100% Deterministic</span>
         </div>
       </footer>
 
-      {/* Interactive Video / Product Walkthrough Demo Modal */}
+      {/* Interactive Walkthrough Demo Modal */}
       <DemoModal
         isOpen={demoModalOpen}
         onClose={() => setDemoModalOpen(false)}

@@ -1,18 +1,17 @@
 import { useState, useEffect } from 'react'
 import {
-  Sparkles,
   RefreshCw,
-  Shield,
-  Activity,
   Layers,
-  Zap,
+  Terminal,
+  Activity,
+  Cpu,
 } from 'lucide-react'
 
 interface SignalSnippet {
   id: string
   source: string
-  severity: 'critical' | 'high' | 'medium'
   channel: string
+  severity: 'critical' | 'high' | 'medium'
   text: string
   cluster: string
   score: number
@@ -79,13 +78,12 @@ export function SignalConvergenceVisual() {
     setReplayKey((prev) => prev + 1)
     setTimeout(() => {
       setProcessingState('processing')
-    }, 900)
+    }, 700)
     setTimeout(() => {
       setProcessingState('resolved')
-    }, 1800)
+    }, 1500)
   }
 
-  // Automatic gentle rotation if untouched
   useEffect(() => {
     const timer = setInterval(() => {
       setActiveSnippetIndex((prev) => (prev + 1) % snippets.length)
@@ -97,27 +95,27 @@ export function SignalConvergenceVisual() {
     <div className="convergence-wrapper" id="signal-convergence">
       <div className="convergence-header">
         <div className="convergence-title-group">
-          <Sparkles size={16} color="#A78BFA" />
-          <span className="convergence-title">Active Signal Convergence</span>
+          <Terminal size={14} color="#94A3B8" />
+          <span className="convergence-title">Active Signal Pipeline</span>
           <span className="convergence-status-pill">
             <span className="status-dot-active" />
             {processingState === 'converging'
-              ? 'Ingesting 4 channels...'
+              ? 'Routing 4 Ingestion Feeds'
               : processingState === 'processing'
-              ? 'Clustering & Scoring...'
-              : 'Live Intelligence Synced'}
+              ? 'Vector Clustering...'
+              : 'Pipeline Live · 100% Deterministic'}
           </span>
         </div>
         <div className="convergence-actions">
-          <button className="convergence-replay-btn" onClick={triggerReplay} title="Replay signal convergence flow">
-            <RefreshCw size={12} className={processingState !== 'resolved' ? 'spin-icon' : ''} />
-            Replay Flow
+          <button className="convergence-replay-btn" onClick={triggerReplay} title="Replay signal routing sequence">
+            <RefreshCw size={11} className={processingState !== 'resolved' ? 'spin-icon' : ''} />
+            Replay Stream
           </button>
         </div>
       </div>
 
       <div className="convergence-canvas">
-        {/* Left: Interactive Snippets */}
+        {/* Left: Input Feed Snippets */}
         <div className="convergence-snippets-column">
           {snippets.map((snip, index) => {
             const isActive = index === activeSnippetIndex
@@ -128,13 +126,13 @@ export function SignalConvergenceVisual() {
                 onClick={() => {
                   setActiveSnippetIndex(index)
                   setProcessingState('processing')
-                  setTimeout(() => setProcessingState('resolved'), 500)
+                  setTimeout(() => setProcessingState('resolved'), 400)
                 }}
               >
                 <div className="snippet-top">
                   <span className="snippet-source">{snip.source}</span>
                   <span className={`snippet-severity severity-${snip.severity}`}>
-                    {snip.severity}
+                    {snip.severity.toUpperCase()}
                   </span>
                 </div>
                 <p className="snippet-text">{snip.text}</p>
@@ -144,51 +142,37 @@ export function SignalConvergenceVisual() {
           })}
         </div>
 
-        {/* Middle: Luminous Animated SVG Flow */}
-        <svg className="svg-flow-container" viewBox="0 0 140 480">
-          <defs>
-            <linearGradient id="flowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#8B5CF6" stopOpacity="0.4" />
-              <stop offset="50%" stopColor="#C084FC" stopOpacity="0.9" />
-              <stop offset="100%" stopColor="#38BDF8" stopOpacity="1" />
-            </linearGradient>
-            <linearGradient id="idleGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="rgba(255,255,255,0.08)" />
-              <stop offset="100%" stopColor="rgba(139,92,246,0.25)" />
-            </linearGradient>
-          </defs>
-
-          {/* Paths connecting each of the 4 cards (approx y: 50, 160, 270, 380) to center node (x: 130, y: 240) */}
+        {/* Middle: Clean High-Precision Technical SVG Bus */}
+        <svg className="svg-flow-container" viewBox="0 0 130 460">
           {[
-            { y: 55, idx: 0 },
-            { y: 165, idx: 1 },
-            { y: 275, idx: 2 },
-            { y: 385, idx: 3 },
+            { y: 50, idx: 0 },
+            { y: 155, idx: 1 },
+            { y: 260, idx: 2 },
+            { y: 365, idx: 3 },
           ].map(({ y, idx }) => {
             const isCardActive = idx === activeSnippetIndex
             return (
               <path
                 key={idx}
-                d={`M 0,${y} C 70,${y} 80,240 140,240`}
+                d={`M 0,${y} C 65,${y} 75,230 130,230`}
                 className={`flow-path ${isCardActive ? 'flow-path-active' : ''}`}
               />
             )
           })}
         </svg>
 
-        {/* Right: Central Intelligence Node & Dashboard Preview */}
+        {/* Right: Decision Routing Core & Output */}
         <div className="convergence-stage-column">
           <div className="intelligence-node">
             <div className="node-pulse-ring" />
-            <div className="node-pulse-ring-outer" />
-            <div className="node-core" title="Vanta Intelligence Processing Core">
-              <Zap size={22} />
+            <div className="node-core" title="Vanta Decision Matrix Engine">
+              <Cpu size={20} />
             </div>
           </div>
 
           <div className="convergence-output-card">
             <div className="output-tag">
-              <Layers size={12} />
+              <Layers size={11} />
               Semantic Cluster Identified
             </div>
             <div className="output-issue-title">{activeSnippet.cluster}</div>
@@ -196,7 +180,7 @@ export function SignalConvergenceVisual() {
             <div className="output-metrics-row">
               <div className="output-metric-item">
                 <small>Priority Score</small>
-                <strong style={{ color: activeSnippet.score > 90 ? '#F87171' : '#38BDF8' }}>
+                <strong style={{ color: activeSnippet.score > 90 ? '#EF4444' : '#FFFFFF' }}>
                   {activeSnippet.score}/100
                 </strong>
               </div>
@@ -206,12 +190,12 @@ export function SignalConvergenceVisual() {
               </div>
               <div className="output-metric-item">
                 <small>Confidence</small>
-                <strong style={{ color: '#34D399' }}>{activeSnippet.metrics.confidence}</strong>
+                <strong style={{ color: '#10B981' }}>{activeSnippet.metrics.confidence}</strong>
               </div>
             </div>
 
             <div className="output-action">
-              <strong style={{ color: '#F5F5F7', display: 'block', marginBottom: 2 }}>
+              <strong style={{ color: '#FFFFFF', display: 'block', marginBottom: 2 }}>
                 Deterministic Action:
               </strong>
               {activeSnippet.action}
