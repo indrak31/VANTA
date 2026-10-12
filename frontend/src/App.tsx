@@ -338,10 +338,11 @@ function App() {
   if (appMode === 'landing') {
     return (
       <LandingPage
-        onLaunchApp={() => {
-          window.location.hash = '#overview'
+        onLaunchApp={(targetView?: ViewKey) => {
+          const v = targetView || 'overview'
+          window.location.hash = `#${v}`
           setAppMode('app')
-          setView('overview')
+          setView(v)
         }}
       />
     )

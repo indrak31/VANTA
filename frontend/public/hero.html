@@ -3,12 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Design World — Explore New Ideas</title>
+  <meta name="theme-color" content="#000000">
+  <meta name="description" content="VANTA — Autonomous customer intelligence, issue radar, and counterfactual simulation platform. Every signal. One clear direction.">
+  <title>VANTA · Customer Intelligence & Decision Analytics</title>
+  <link rel="icon" type="image/png" href="./frontend/public/vanta-brand.png">
 
-  <!-- Google Fonts: Poppins (300, 400, 500, 600, 700, 800) -->
+  <!-- Google Fonts: Poppins (300, 400, 500, 600, 700, 800) & DM Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0 }
@@ -67,7 +70,7 @@
       white-space: nowrap;
     }
 
-    /* NAV */
+    /* NAV HEADER */
     .nav {
       position: absolute;
       top: clamp(24px, 4.7vh, 40px);
@@ -76,40 +79,66 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 20px;
     }
-    .logo {
+    .brand-lockup {
       display: flex;
       align-items: center;
-      gap: 8px;
-      color: #fff;
+      gap: 12px;
+      flex: none;
+    }
+    .logo {
+      display: inline-flex;
+      align-items: center;
       text-decoration: none;
-      font-size: 15px;
-      letter-spacing: -0.01em;
+      outline: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
     }
-    .logo-mark {
-      width: 20px;
-      height: 40px;
-      background: #fff;
-      border-radius: 0 20px 20px 0;
+    .logo:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
     }
-    .logo b {
-      font-weight: 700;
+    .logo-img {
+      height: 28px;
+      width: auto;
+      max-width: 140px;
+      object-fit: contain;
+      display: block;
+      filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.4));
     }
-    .logo span {
-      font-weight: 400;
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      font-family: 'DM Mono', monospace, sans-serif;
+      font-size: 8.5px;
+      letter-spacing: 0.16em;
+      font-weight: 500;
+      text-transform: uppercase;
+      color: #9aa7a3;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      padding: 3px 8px;
+      border-radius: 4px;
     }
     .nav-links {
       display: flex;
-      gap: clamp(20px, 4.1vw, 60px);
+      gap: clamp(18px, 3.2vw, 48px);
       list-style: none;
+      margin: 0;
+      padding: 0;
     }
     .nav-links a {
-      color: #fff;
+      color: #d1d5db;
       text-decoration: none;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 500;
       position: relative;
       cursor: pointer;
+      letter-spacing: -0.01em;
+      transition: color 0.2s ease;
+    }
+    .nav-links a:hover {
+      color: #fff;
     }
     .nav-links a::after {
       content: '';
@@ -117,15 +146,54 @@
       left: 0;
       right: 0;
       bottom: -4px;
-      height: 1px;
-      background: currentColor;
+      height: 1.5px;
+      background: #fff;
       transform: scaleX(0);
       transform-origin: right;
-      transition: transform .35s ease;
+      transition: transform 0.3s ease;
     }
     .nav-links a:hover::after {
       transform: scaleX(1);
       transform-origin: left;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      flex: none;
+    }
+    .nav-cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 18px;
+      height: 38px;
+      border-radius: 9999px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.07);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .nav-cta-btn:hover {
+      background: #fff;
+      color: #000;
+      border-color: #fff;
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.18);
+      transform: translateY(-1px);
+    }
+    .nav-arrow {
+      display: inline-block;
+      transition: transform 0.25s ease;
+    }
+    .nav-cta-btn:hover .nav-arrow {
+      transform: translateX(3px);
     }
 
     /* ARROWS */
@@ -141,21 +209,24 @@
       width: 38px;
       height: 38px;
       border-radius: 50%;
-      border: 2.5px solid #fff;
+      border: 2px solid rgba(255, 255, 255, 0.9);
       background: transparent;
       color: #fff;
       display: grid;
       place-items: center;
       cursor: pointer;
-      transition: background .25s, color .25s;
+      transition: background 0.25s, color 0.25s, transform 0.2s, border-color 0.25s;
     }
-    .arrow svg {
-      width: 18px;
-      height: 18px;
+    .arrow svg, .arrow * {
+      width: 17px;
+      height: 17px;
+      pointer-events: none;
     }
     .arrow:hover {
       background: #fff;
       color: #000;
+      border-color: #fff;
+      transform: scale(1.06);
     }
 
     /* PAGINATION DOTS */
@@ -166,7 +237,7 @@
       transform: translateY(-50%);
       display: flex;
       flex-direction: column;
-      gap: 33px;
+      gap: 30px;
     }
     .dot {
       width: 14px;
@@ -175,25 +246,44 @@
       border: 2px solid #fff;
       background: #fff;
       cursor: pointer;
-      transition: background .25s;
+      padding: 0;
+      transition: background 0.25s, transform 0.2s;
+    }
+    .dot:hover {
+      transform: scale(1.2);
     }
     .dot.active {
       background: transparent;
     }
 
     /* TAGLINE */
-    .tagline {
+    .tagline-wrap {
       position: absolute;
       left: var(--pad-x);
-      bottom: clamp(40px, 7.5vh, 70px);
+      bottom: clamp(36px, 7.5vh, 70px);
+      max-width: min(520px, 45vw);
+      pointer-events: none;
+    }
+    .tagline {
       font-size: clamp(24px, 2.65vw, 44px);
-      line-height: 1.2;
+      line-height: 1.18;
       font-weight: 300;
-      letter-spacing: -0.01em;
+      letter-spacing: -0.015em;
+      margin: 0;
+      color: #fff;
     }
     .tagline strong {
       font-weight: 700;
       display: block;
+    }
+    .tagline-sub {
+      margin: 10px 0 0;
+      font-size: clamp(12px, 0.95vw, 14px);
+      color: #9aa7a3;
+      font-weight: 400;
+      line-height: 1.5;
+      letter-spacing: 0.01em;
+      font-family: 'Poppins', sans-serif;
     }
 
     /* CTA ROW */
@@ -208,28 +298,44 @@
     }
     .cta {
       flex: none;
-      padding: 0 15px;
+      padding: 0 20px;
       height: 48px;
       display: inline-flex;
       align-items: center;
-      border: 1.5px solid rgba(255, 255, 255, .85);
+      gap: 10px;
+      border: 1.5px solid rgba(255, 255, 255, 0.85);
       border-radius: 6px;
-      background: rgba(0, 0, 0, .15);
+      background: rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       color: #fff;
       font-size: 14px;
-      font-weight: 400;
+      font-weight: 500;
       text-decoration: none;
       cursor: pointer;
-      transition: background .25s, color .25s;
+      transition: background 0.25s, color 0.25s, transform 0.2s, box-shadow 0.25s;
+    }
+    .cta * {
+      pointer-events: none;
     }
     .cta:hover {
       background: #fff;
       color: #000;
+      box-shadow: 0 4px 24px rgba(255, 255, 255, 0.22);
+      transform: translateY(-1px);
+    }
+    .cta-arrow {
+      display: inline-block;
+      font-size: 15px;
+      transition: transform 0.25s ease;
+    }
+    .cta:hover .cta-arrow {
+      transform: translateX(4px);
     }
     .cta-line {
       flex: 1;
       height: 1.5px;
-      background: rgba(255, 255, 255, .8);
+      background: rgba(255, 255, 255, 0.8);
       min-width: 40px;
     }
     .count {
@@ -239,7 +345,7 @@
       line-height: 1;
       letter-spacing: -0.02em;
       color: transparent;
-      -webkit-text-stroke: 1.5px rgba(255, 255, 255, .9);
+      -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.9);
       transform: translateY(6%);
       user-select: none;
     }
@@ -250,15 +356,17 @@
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
-      font-size: 12px;
-      letter-spacing: .2em;
+      font-size: 11px;
+      letter-spacing: 0.22em;
       text-transform: uppercase;
-      opacity: .6;
-      transition: opacity .6s;
+      color: #9aa7a3;
+      opacity: 0.6;
+      font-family: 'DM Mono', monospace;
+      transition: opacity 0.6s;
+      pointer-events: none;
     }
     .loader.done {
       opacity: 0;
-      pointer-events: none;
     }
 
     /* RESPONSIVE */
@@ -270,8 +378,9 @@
         transform: translateY(-50%);
         gap: 14px;
       }
-      .tagline {
-        bottom: clamp(150px, 20vh, 220px);
+      .tagline-wrap {
+        max-width: 80vw;
+        bottom: clamp(130px, 18vh, 200px);
       }
       .cta-row {
         left: var(--pad-x);
@@ -281,19 +390,30 @@
         transform: none;
       }
       .count {
-        font-size: clamp(120px, 22vw, 200px);
+        font-size: clamp(110px, 20vw, 180px);
+      }
+    }
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+      }
+      .logo-badge {
+        display: none;
+      }
+      .nav-cta-btn {
+        padding: 6px 14px;
+        font-size: 12px;
+        height: 34px;
       }
     }
     @media (max-width: 640px) {
-      .nav-links {
-        gap: 16px;
-      }
-      .nav-links a, .logo {
-        font-size: 13px;
+      .logo-img {
+        height: 22px;
+        max-width: 110px;
       }
       .dots {
-        gap: 20px;
-        right: 16px;
+        gap: 18px;
+        right: 14px;
       }
       .dot {
         width: 10px;
@@ -303,12 +423,10 @@
         right: -8vw;
       }
       .count {
-        font-size: 120px;
+        font-size: 100px;
       }
-    }
-    @media (max-width: 420px) {
-      .nav-links li:nth-child(2) {
-        display: none;
+      .tagline-sub {
+        font-size: 11px;
       }
     }
   </style>
@@ -327,39 +445,57 @@
   <section class="hero" id="hero">
     <canvas id="scene" aria-label="Rotatable glass cube. Drag to rotate."></canvas>
     <div class="ui">
-      <h1 class="sr-only">Explore New Ideas</h1>
+      <h1 class="sr-only">VANTA — Autonomous Customer Intelligence & Decision Analytics</h1>
       <header class="nav">
-        <a href="#" class="logo"><i class="logo-mark"></i><b>Design</b><span>World</span></a>
+        <div class="brand-lockup">
+          <a href="#" class="logo" title="VANTA · Customer Intelligence">
+            <img src="./frontend/public/vanta-brand.png" onerror="this.onerror=null; this.src='/vanta-brand.png';" alt="VANTA" class="logo-img">
+          </a>
+          <span class="logo-badge">SIGNAL OS</span>
+        </div>
         <ul class="nav-links">
-          <li><a href="#">Home</a></li>
-          <li><a href="#">Portfolio</a></li>
-          <li><a href="#">Contact Us</a></li>
+          <li><a href="http://localhost:5173/#overview">Overview</a></li>
+          <li><a href="http://localhost:5173/#radar">Issue Radar</a></li>
+          <li><a href="http://localhost:5173/#simulator">Simulator</a></li>
+          <li><a href="http://localhost:5173/#adaptation">Adaption Lab</a></li>
         </ul>
+        <div class="nav-actions">
+          <a href="http://localhost:5173/#overview" class="nav-cta-btn">
+            <span>Launch Workspace</span>
+            <span class="nav-arrow" aria-hidden="true">→</span>
+          </a>
+        </div>
       </header>
       <div class="arrows">
-        <button class="arrow" id="prev" aria-label="Previous">
+        <button class="arrow" id="prev" aria-label="Previous Slide">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
             <path d="M19 12H5M11 6l-6 6 6 6"/>
           </svg>
         </button>
-        <button class="arrow" id="next" aria-label="Next">
+        <button class="arrow" id="next" aria-label="Next Slide">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
             <path d="M5 12h14M13 6l6 6-6 6"/>
           </svg>
         </button>
       </div>
-      <nav class="dots">
-        <button class="dot" aria-label="Slide 1"></button>
-        <button class="dot active" aria-label="Slide 2"></button>
-        <button class="dot" aria-label="Slide 3"></button>
+      <nav class="dots" aria-label="Signal pillars">
+        <button class="dot active" data-index="0" aria-label="Slide 1"></button>
+        <button class="dot" data-index="1" aria-label="Slide 2"></button>
+        <button class="dot" data-index="2" aria-label="Slide 3"></button>
       </nav>
-      <p class="tagline">Let's Build the<br>Future of <strong>Design.</strong></p>
-      <div class="cta-row">
-        <a href="/#app" class="cta">Explore Now</a>
-        <span class="cta-line"></span>
-        <span class="count" aria-hidden="true">07</span>
+      <div class="tagline-wrap">
+        <p class="tagline" id="tagline">Every Signal.<br>One Clear <strong>Direction.</strong></p>
+        <p class="tagline-sub" id="tagline-sub">Autonomous customer intelligence & predictive signal operations.</p>
       </div>
-      <div class="loader" id="loader">Loading model</div>
+      <div class="cta-row">
+        <a href="http://localhost:5173/#overview" class="cta" id="cta-btn">
+          <span id="cta-text">Launch Workspace</span>
+          <span class="cta-arrow" aria-hidden="true">→</span>
+        </a>
+        <span class="cta-line"></span>
+        <span class="count" id="count-number" aria-hidden="true">01</span>
+      </div>
+      <div class="loader" id="loader">Initializing Signal Engine</div>
     </div>
   </section>
 
@@ -371,8 +507,44 @@
 
     const MODEL_URL = 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260929_212926_92423081-b0e4-4f5a-b650-14af6c05c058.glb';
 
+    const SLIDES = [
+      {
+        lines: ['EVERY', 'SIGNAL', 'DIRECTION'],
+        html: 'Every Signal.<br>One Clear <strong>Direction.</strong>',
+        subtext: 'Autonomous customer intelligence & predictive signal operations.',
+        count: '01',
+        ctaText: 'Launch Workspace',
+        hash: '#overview'
+      },
+      {
+        lines: ['DECISION', 'RADAR', 'SIMULATOR'],
+        html: 'Predict Impact.<br>Before Writing <strong>Code.</strong>',
+        subtext: 'Deterministic issue radar with counterfactual what-if simulation.',
+        count: '02',
+        ctaText: 'Open Simulator',
+        hash: '#simulator'
+      },
+      {
+        lines: ['ADAPT', 'EXECUTE', 'SCALE'],
+        html: 'Closed Loop.<br>From Signal to <strong>Action.</strong>',
+        subtext: 'Automated adaptation playbooks connected to measurable customer baselines.',
+        count: '03',
+        ctaText: 'Explore Lab',
+        hash: '#adaptation'
+      }
+    ];
+
+    let activeSlideIndex = 0;
+    let arrowTurnTarget = 0;
+
     const canvas = document.getElementById('scene');
     const loaderEl = document.getElementById('loader');
+    const taglineEl = document.getElementById('tagline');
+    const taglineSubEl = document.getElementById('tagline-sub');
+    const ctaBtn = document.getElementById('cta-btn');
+    const ctaTextEl = document.getElementById('cta-text');
+    const countEl = document.getElementById('count-number');
+    const dots = Array.from(document.querySelectorAll('.dot'));
 
     // 1. Renderer & Camera
     const renderer = new THREE.WebGLRenderer({
@@ -394,7 +566,7 @@
 
     const headlineCanvas = document.createElement('canvas');
     const headlineCtx = headlineCanvas.getContext('2d');
-    let bgTexture = new THREE.CanvasTexture(headlineCanvas);
+    const bgTexture = new THREE.CanvasTexture(headlineCanvas);
     bgTexture.colorSpace = THREE.SRGBColorSpace;
     bgTexture.minFilter = THREE.LinearFilter;
     bgTexture.magFilter = THREE.LinearFilter;
@@ -427,11 +599,11 @@
     bgQuad.frustumCulled = false;
     bgScene.add(bgQuad);
 
-    // 3. Render Targets for 2-Pass Screen-Space Refraction
+    // 3. Render Targets for 2-Pass Refraction
     let rtBack = null;
     let rtFront = null;
 
-    // 4. Glass Shaders
+    // 4. Glass Shaders (exact chromatic dispersion)
     const vertexShader = `
       varying vec3 vNormal;
       varying vec3 vEye;
@@ -554,7 +726,7 @@
       uShininess: { value: 90.0 },
       uDiffuseness: { value: 0.02 },
       uFresnelPower: { value: 5.0 },
-      uLight: { value: new THREE.Vector3(-1.0, 1.0, 1.0) },
+      uLight: { value: new THREE.Vector3(-1.0, 1.0, 1.0) }
     };
 
     const backMat = new THREE.ShaderMaterial({
@@ -594,7 +766,7 @@
     function setupMeshWithGeometry(geom) {
       cubeMesh = new THREE.Mesh(geom, frontMat);
       spinner.add(cubeMesh);
-      loaderEl.classList.add('done');
+      if (loaderEl) loaderEl.classList.add('done');
       layout();
     }
 
@@ -672,7 +844,8 @@
       let fs = Math.min(H * 0.21, W * (mobile ? 0.21 : 0.118));
 
       headlineCtx.font = `800 ${fs * dpr}px Poppins`;
-      const lines = ['Explore', 'New', 'Ideas'];
+      const currentSlide = SLIDES[activeSlideIndex] || SLIDES[0];
+      const lines = currentSlide.lines;
       const maxW = Math.max(...lines.map(l => headlineCtx.measureText(l).width)) / dpr;
       const targetMaxW = W * (mobile ? 0.9 : 0.5);
       if (maxW > targetMaxW && maxW > 0) {
@@ -712,7 +885,6 @@
       frontMat.uniforms.uResolution.value.set(bufferW, bufferH);
       backMat.uniforms.uResolution.value.set(bufferW, bufferH);
 
-      // Recreate or resize Render Targets
       if (!rtBack || rtBack.width !== bufferW || rtBack.height !== bufferH) {
         if (rtBack) rtBack.dispose();
         if (rtFront) rtFront.dispose();
@@ -737,7 +909,6 @@
 
       redrawHeadline(W, H, dpr);
 
-      // Cube placement
       const mobile = (W < 768) || (W / H < 1);
       const fovRad = THREE.MathUtils.degToRad(camera.fov);
       const visH = 2 * Math.tan(fovRad / 2) * 10;
@@ -745,7 +916,11 @@
 
       const sx = mobile ? 0.5 : 0.517;
       const sy = mobile ? 0.45 : 0.488;
-      pivot.position.set((sx - 0.5) * visW, (0.5 - sy) * visH, 0);
+      pivot.position.set(
+        (sx - 0.5) * visW,
+        (0.5 - sy) * visH,
+        0
+      );
 
       const px = Math.min(H * 0.44, W * (mobile ? 0.45 : 0.29));
       const scale = (px / H) * visH;
@@ -754,19 +929,16 @@
 
     window.addEventListener('resize', layout);
     if (document.fonts) {
-      document.fonts.addEventListener('loadingdone', () => {
-        layout();
-      });
+      document.fonts.addEventListener('loadingdone', layout);
     }
 
-    // 7. Interaction: Drag, Inertia, Idle Drift, Arrows, Dots
+    // 7. Interaction: Drag, Inertia, Idle Drift
     let isDragging = false;
     let lastX = 0;
     let lastY = 0;
     let velX = 0;
     let velY = 0;
     let lastDragEndTime = -10000;
-    let remainingArrowTurn = 0;
 
     canvas.addEventListener('pointerdown', (e) => {
       canvas.setPointerCapture(e.pointerId);
@@ -776,7 +948,7 @@
       lastY = e.clientY;
       velX = 0;
       velY = 0;
-      remainingArrowTurn = 0;
+      arrowTurnTarget = 0;
     });
 
     canvas.addEventListener('pointermove', (e) => {
@@ -796,43 +968,45 @@
       spinner.quaternion.premultiply(qY).premultiply(qX);
     });
 
-    const stopDrag = (e) => {
+    const endDrag = (e) => {
       if (!isDragging) return;
       isDragging = false;
       canvas.classList.remove('dragging');
       lastDragEndTime = performance.now();
-      try {
-        canvas.releasePointerCapture(e.pointerId);
-      } catch (_) {}
+      try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
     };
+    canvas.addEventListener('pointerup', endDrag);
+    canvas.addEventListener('pointercancel', endDrag);
 
-    canvas.addEventListener('pointerup', stopDrag);
-    canvas.addEventListener('pointercancel', stopDrag);
+    // Slide Switching Logic
+    function setSlide(newIdx, turnDirection = 0) {
+      activeSlideIndex = (newIdx + SLIDES.length) % SLIDES.length;
+      dots.forEach((d, i) => d.classList.toggle('active', i === activeSlideIndex));
+      const s = SLIDES[activeSlideIndex];
+      taglineEl.innerHTML = s.html;
+      taglineSubEl.textContent = s.subtext;
+      countEl.textContent = s.count;
+      ctaTextEl.textContent = s.ctaText;
+      ctaBtn.href = 'http://localhost:5173/' + s.hash;
 
-    // Prev / Next Arrows
-    const prevBtn = document.getElementById('prev');
-    const nextBtn = document.getElementById('next');
+      if (turnDirection !== 0) {
+        arrowTurnTarget += turnDirection * (Math.PI / 2);
+      }
+      redrawHeadline(window.innerWidth, window.innerHeight, Math.min(window.devicePixelRatio || 1, 2));
+    }
 
-    prevBtn.addEventListener('click', () => {
-      remainingArrowTurn -= Math.PI / 2;
-      velX = 0;
-      velY = 0;
-      lastDragEndTime = performance.now();
+    document.getElementById('prev').addEventListener('click', () => {
+      setSlide(activeSlideIndex - 1, -1);
     });
 
-    nextBtn.addEventListener('click', () => {
-      remainingArrowTurn += Math.PI / 2;
-      velX = 0;
-      velY = 0;
-      lastDragEndTime = performance.now();
+    document.getElementById('next').addEventListener('click', () => {
+      setSlide(activeSlideIndex + 1, 1);
     });
 
-    // Pagination Dots
-    const dotButtons = document.querySelectorAll('.dots .dot');
-    dotButtons.forEach((dot) => {
+    dots.forEach((dot, idx) => {
       dot.addEventListener('click', () => {
-        dotButtons.forEach(d => d.classList.remove('active'));
-        dot.classList.add('active');
+        if (idx === activeSlideIndex) return;
+        setSlide(idx, idx > activeSlideIndex ? 1 : -1);
       });
     });
 
@@ -845,19 +1019,18 @@
       const dt = Math.min(0.05, (now - lastTime) / 1000);
       lastTime = now;
 
-      // Handle Smooth Arrow Turn
-      if (Math.abs(remainingArrowTurn) > 0.0005) {
-        const step = remainingArrowTurn * Math.min(1.0, 0.09 * dt * 60);
-        remainingArrowTurn -= step;
+      // Smooth arrow turn
+      if (Math.abs(arrowTurnTarget) > 0.0005) {
+        const step = arrowTurnTarget * Math.min(1.0, 0.09 * dt * 60);
+        arrowTurnTarget -= step;
         const qTurn = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), step);
         spinner.quaternion.premultiply(qTurn);
       } else {
-        remainingArrowTurn = 0;
+        arrowTurnTarget = 0;
       }
 
-      // Handle Inertia & Idle Drift
-      if (!isDragging && remainingArrowTurn === 0) {
-        // Inertia damping
+      // Inertia & Idle Drift
+      if (!isDragging && arrowTurnTarget === 0) {
         const damp = Math.pow(0.94, dt * 60);
         velX *= damp;
         velY *= damp;
@@ -868,7 +1041,6 @@
           spinner.quaternion.premultiply(qY).premultiply(qX);
         }
 
-        // Idle drift: after 0.6s, ramp in over 1.0s
         const timeSinceDrag = (now - lastDragEndTime) / 1000;
         if (timeSinceDrag > 0.6) {
           const blend = Math.min(1.0, (timeSinceDrag - 0.6) / 1.0);
@@ -910,13 +1082,11 @@
         renderer.render(scene, camera);
         renderer.autoClear = true;
       } else {
-        // Fallback or while loading
         renderer.setRenderTarget(null);
         renderer.render(bgScene, camera);
       }
     }
 
-    // Wait for fonts before initial draw
     Promise.race([
       Promise.all([
         document.fonts ? document.fonts.load('800 100px Poppins') : Promise.resolve(),

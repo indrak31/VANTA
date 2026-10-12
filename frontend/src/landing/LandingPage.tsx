@@ -3,15 +3,62 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { mergeVertices, mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
+import type { ViewKey } from '../types'
 import './landing.css'
 
 const MODEL_URL = 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260929_212926_92423081-b0e4-4f5a-b650-14af6c05c058.glb'
 
-export function LandingPage({ onLaunchApp }: { onLaunchApp: () => void }) {
+export interface HeroSlide {
+  lines: string[]
+  line1: string
+  line2Prefix: string
+  line2Accent: string
+  subtext: string
+  count: string
+  targetView: ViewKey
+  ctaText: string
+}
+
+const SLIDES: HeroSlide[] = [
+  {
+    lines: ['EVERY', 'SIGNAL', 'DIRECTION'],
+    line1: 'Every Signal.',
+    line2Prefix: 'One Clear',
+    line2Accent: 'Direction.',
+    subtext: 'Autonomous customer intelligence & predictive signal operations.',
+    count: '01',
+    targetView: 'overview',
+    ctaText: 'Launch Workspace',
+  },
+  {
+    lines: ['DECISION', 'RADAR', 'SIMULATOR'],
+    line1: 'Predict Impact.',
+    line2Prefix: 'Before Writing',
+    line2Accent: 'Code.',
+    subtext: 'Deterministic issue radar with counterfactual what-if simulation.',
+    count: '02',
+    targetView: 'simulator',
+    ctaText: 'Open Simulator',
+  },
+  {
+    lines: ['ADAPT', 'EXECUTE', 'SCALE'],
+    line1: 'Closed Loop.',
+    line2Prefix: 'From Signal to',
+    line2Accent: 'Action.',
+    subtext: 'Automated adaptation playbooks connected to measurable customer baselines.',
+    count: '03',
+    targetView: 'adaptation',
+    ctaText: 'Explore Lab',
+  },
+]
+
+export function LandingPage({ onLaunchApp }: { onLaunchApp: (view?: ViewKey) => void }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const [modelLoaded, setModelLoaded] = useState(false)
-  const [activeDot, setActiveDot] = useState(1) // Middle dot active by default
+  const [activeDot, setActiveDot] = useState(0)
 
+  const activeSlideRef = useRef(0)
+  const redrawHeadlineRef = useRef<(() => void) | null>(null)
   const arrowTurnRef = useRef(0)
 
   useEffect(() => {
@@ -320,7 +367,8 @@ export function LandingPage({ onLaunchApp }: { onLaunchApp: () => void }) {
       let fs = Math.min(H * 0.21, W * (mobile ? 0.21 : 0.118))
 
       headlineCtx.font = `800 ${fs * dpr}px Poppins`
-      const lines = ['Explore', 'New', 'Ideas']
+      const currentSlide = SLIDES[activeSlideRef.current] || SLIDES[0]
+      const lines = currentSlide.lines
       const maxW = Math.max(...lines.map((l) => headlineCtx.measureText(l).width)) / dpr
       const targetMaxW = W * (mobile ? 0.9 : 0.5)
       if (maxW > targetMaxW && maxW > 0) {
@@ -343,6 +391,13 @@ export function LandingPage({ onLaunchApp }: { onLaunchApp: () => void }) {
       }
 
       bgTexture.needsUpdate = true
+    }
+
+    redrawHeadlineRef.current = () => {
+      const W = window.innerWidth
+      const H = window.innerHeight
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      redrawHeadline(W, H, dpr)
     }
 
     function layout() {
@@ -562,92 +617,176 @@ export function LandingPage({ onLaunchApp }: { onLaunchApp: () => void }) {
       bgTexture.dispose()
       frontMat.dispose()
       backMat.dispose()
+      redrawHeadlineRef.current = null
     }
   }, [])
 
   const handlePrev = () => {
     arrowTurnRef.current -= Math.PI / 2
+    const next = (activeSlideRef.current - 1 + SLIDES.length) % SLIDES.length
+    activeSlideRef.current = next
+    setActiveDot(next)
+    redrawHeadlineRef.current?.()
   }
 
   const handleNext = () => {
     arrowTurnRef.current += Math.PI / 2
+    const next = (activeSlideRef.current + 1) % SLIDES.length
+    activeSlideRef.current = next
+    setActiveDot(next)
+    redrawHeadlineRef.current?.()
   }
+
+  const handleSelectSlide = (idx: number) => {
+    if (idx === activeSlideRef.current) return
+    const diff = idx - activeSlideRef.current
+    arrowTurnRef.current += (diff > 0 ? 1 : -1) * (Math.PI / 2)
+    activeSlideRef.current = idx
+    setActiveDot(idx)
+    redrawHeadlineRef.current?.()
+  }
+
+  const currentSlide = SLIDES[activeDot] || SLIDES[0]
 
   return (
     <section className="hero" id="hero">
       <canvas
         ref={canvasRef}
         id="scene"
-        aria-label="Rotatable glass cube. Drag to rotate."
+        aria-label="Rotatable glass cube refracting Vanta customer intelligence signals. Drag to rotate."
       />
       <div className="ui">
-        <h1 className="sr-only">Explore New Ideas</h1>
+        <h1 className="sr-only">VANTA — Autonomous Customer Intelligence & Decision Analytics</h1>
+        
+        {/* NAV HEADER */}
         <header className="nav">
-          <a href="#" className="logo">
-            <i className="logo-mark" />
-            <b>Design</b>
-            <span>World</span>
-          </a>
+          <div className="brand-lockup">
+            <a
+              href="#hero"
+              className="logo"
+              onClick={(e) => {
+                e.preventDefault()
+                handleSelectSlide(0)
+              }}
+              title="VANTA · Customer Intelligence"
+            >
+              <img src="/vanta-brand.png" alt="VANTA" className="logo-img" />
+            </a>
+            <span className="logo-badge">SIGNAL OS</span>
+          </div>
+
           <ul className="nav-links">
-            <li><a href="#" onClick={(e) => { e.preventDefault(); }}>Home</a></li>
-            <li><a href="#" onClick={(e) => { e.preventDefault(); }}>Portfolio</a></li>
-            <li><a href="#" onClick={(e) => { e.preventDefault(); }}>Contact Us</a></li>
+            <li>
+              <a
+                href="#overview"
+                onClick={(e) => {
+                  e.preventDefault()
+                  onLaunchApp('overview')
+                }}
+              >
+                Overview
+              </a>
+            </li>
+            <li>
+              <a
+                href="#radar"
+                onClick={(e) => {
+                  e.preventDefault()
+                  onLaunchApp('radar')
+                }}
+              >
+                Issue Radar
+              </a>
+            </li>
+            <li>
+              <a
+                href="#simulator"
+                onClick={(e) => {
+                  e.preventDefault()
+                  onLaunchApp('simulator')
+                }}
+              >
+                Simulator
+              </a>
+            </li>
+            <li>
+              <a
+                href="#adaptation"
+                onClick={(e) => {
+                  e.preventDefault()
+                  onLaunchApp('adaptation')
+                }}
+              >
+                Adaption Lab
+              </a>
+            </li>
           </ul>
+
+          <div className="nav-actions">
+            <button
+              type="button"
+              className="nav-cta-btn"
+              onClick={() => onLaunchApp('overview')}
+            >
+              <span>Launch Workspace</span>
+              <span className="nav-arrow" aria-hidden="true">→</span>
+            </button>
+          </div>
         </header>
 
+        {/* 3D ARROW CONTROLS */}
         <div className="arrows">
-          <button className="arrow" id="prev" onClick={handlePrev} aria-label="Previous">
+          <button className="arrow" id="prev" onClick={handlePrev} aria-label="Previous Slide">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
               <path d="M19 12H5M11 6l-6 6 6 6" />
             </svg>
           </button>
-          <button className="arrow" id="next" onClick={handleNext} aria-label="Next">
+          <button className="arrow" id="next" onClick={handleNext} aria-label="Next Slide">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 12h14M13 6l6 6-6 6" />
             </svg>
           </button>
         </div>
 
-        <nav className="dots">
-          <button
-            className={`dot ${activeDot === 0 ? 'active' : ''}`}
-            onClick={() => setActiveDot(0)}
-            aria-label="Slide 1"
-          />
-          <button
-            className={`dot ${activeDot === 1 ? 'active' : ''}`}
-            onClick={() => setActiveDot(1)}
-            aria-label="Slide 2"
-          />
-          <button
-            className={`dot ${activeDot === 2 ? 'active' : ''}`}
-            onClick={() => setActiveDot(2)}
-            aria-label="Slide 3"
-          />
+        {/* PAGINATION DOTS */}
+        <nav className="dots" aria-label="Signal pillars">
+          {SLIDES.map((slide, idx) => (
+            <button
+              key={slide.count}
+              type="button"
+              className={`dot ${activeDot === idx ? 'active' : ''}`}
+              onClick={() => handleSelectSlide(idx)}
+              aria-label={`Slide ${idx + 1}: ${slide.lines.join(' ')}`}
+            />
+          ))}
         </nav>
 
-        <p className="tagline">
-          Let's Build the<br />
-          Future of <strong>Design.</strong>
-        </p>
-
-        <div className="cta-row">
-          <a
-            href="#app"
-            className="cta"
-            onClick={(e) => {
-              e.preventDefault()
-              onLaunchApp()
-            }}
-          >
-            Explore Now
-          </a>
-          <span className="cta-line" />
-          <span className="count" aria-hidden="true">07</span>
+        {/* TAGLINE & SUBTITLE */}
+        <div className="tagline-wrap">
+          <p className="tagline">
+            {currentSlide.line1}<br />
+            {currentSlide.line2Prefix} <strong>{currentSlide.line2Accent}</strong>
+          </p>
+          <p className="tagline-sub">{currentSlide.subtext}</p>
         </div>
 
+        {/* BOTTOM CTA & LARGE STROKE COUNT */}
+        <div className="cta-row">
+          <button
+            type="button"
+            className="cta"
+            onClick={() => onLaunchApp(currentSlide.targetView)}
+          >
+            <span>{currentSlide.ctaText}</span>
+            <span className="cta-arrow" aria-hidden="true">→</span>
+          </button>
+          <span className="cta-line" />
+          <span className="count" aria-hidden="true">{currentSlide.count}</span>
+        </div>
+
+        {/* LOADING INDICATOR */}
         <div className={`loader ${modelLoaded ? 'done' : ''}`} id="loader">
-          Loading model
+          Initializing Signal Engine
         </div>
       </div>
     </section>
