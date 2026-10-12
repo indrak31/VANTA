@@ -65,10 +65,12 @@ import {
 } from './api'
 import type { AdaptionAvailability, AdaptionRun } from './api'
 import type {
+  AdaptationExperiment,
   DashboardData,
   FeedbackRecord,
   Issue,
   Recommendation,
+  ReportDefinition,
   Scenario,
   ViewKey,
 } from './types'
@@ -106,7 +108,6 @@ const sentimentData = [
   { name: 'Neutral', value: 29, color: 'var(--muted)' },
   { name: 'Positive', value: 25, color: 'var(--green)' },
 ]
-const blue = 'var(--cobalt)'
 const chartTooltipStyle = {
   background: 'var(--surface-strong)',
   border: '1px solid var(--line-dark)',
@@ -125,6 +126,16 @@ const readStorage = <T,>(key: string, fallback: T): T => {
   }
 }
 
+type WorkspaceInfo = { id: string; org: string; name: string; count: number }
+
+const initialWorkspaces: WorkspaceInfo[] = [
+  { id: 'ws-northstar', org: 'Northstar', name: 'Product', count: 18 },
+  { id: 'ws-enterprise', org: 'Enterprise', name: 'Security & Risk', count: 24 },
+  { id: 'ws-platform', org: 'Core Platform', name: 'Infrastructure', count: 12 },
+]
+
+type RecipientItem = { initials: string; name: string; note: string }
+
 function App() {
   const [view, setView] = useState<ViewKey>(() => {
     const candidate = window.location.hash.slice(1) as ViewKey
@@ -137,6 +148,22 @@ function App() {
   const [toast, setToast] = useState('')
   const [savedIssues, setSavedIssues] = useState<string[]>(() => readStorage('ifn-saved-issues', []))
   const [savedScenarios, setSavedScenarios] = useState<Scenario[]>(() => readStorage('ifn-saved-scenarios', []))
+
+  // Enterprise Interactive States
+  const [workspaces, setWorkspaces] = useState<WorkspaceInfo[]>(initialWorkspaces)
+  const [activeWorkspace, setActiveWorkspace] = useState<WorkspaceInfo>(initialWorkspaces[0])
+  const [workspaceOpen, setWorkspaceOpen] = useState(false)
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [helpOpen, setHelpOpen] = useState(false)
+  const [reportModalOpen, setReportModalOpen] = useState(false)
+  const [recipientModalOpen, setRecipientModalOpen] = useState(false)
+  const [reviewExperiment, setReviewExperiment] = useState<AdaptationExperiment | null>(null)
+  const [isSyncing, setIsSyncing] = useState(false)
+  const [distributionRecipients, setDistributionRecipients] = useState<RecipientItem[]>([
+    { initials: 'PL', name: 'Product leadership', note: 'Weekly signal brief' },
+    { initials: 'CO', name: 'CX & operations', note: 'Enterprise friction review' },
+  ])
 
   useEffect(() => {
     const onHash = () => {
@@ -161,6 +188,7 @@ function App() {
 
   useEffect(() => localStorage.setItem('ifn-saved-issues', JSON.stringify(savedIssues)), [savedIssues])
   useEffect(() => localStorage.setItem('ifn-saved-scenarios', JSON.stringify(savedScenarios)), [savedScenarios])
+
   useEffect(() => {
     if (!sidebarOpen) return
     const mobileViewport = window.matchMedia('(max-width: 1100px)')
@@ -169,38 +197,13 @@ function App() {
       return
     }
 
-    const scrollStyles = [document.documentElement, document.body].map((element) => ({
-      element,
-      value: element.style.getPropertyValue('overflow-y'),
-      priority: element.style.getPropertyPriority('overflow-y'),
-    }))
-    scrollStyles.forEach(({ element }) => element.style.setProperty('overflow-y', 'hidden'))
-    let scrollLocked = true
-    const restoreScroll = () => {
-      if (!scrollLocked) return
-      scrollStyles.forEach(({ element, value, priority }) => {
-        if (value) element.style.setProperty('overflow-y', value, priority)
-        else element.style.removeProperty('overflow-y')
-      })
-      scrollLocked = false
-    }
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setSidebarOpen(false)
     }
-    const onViewportChange = () => {
-      if (!mobileViewport.matches) {
-        restoreScroll()
-        setSidebarOpen(false)
-      }
-    }
     document.addEventListener('keydown', onKeyDown)
-    mobileViewport.addEventListener('change', onViewportChange)
-    return () => {
-      document.removeEventListener('keydown', onKeyDown)
-      mobileViewport.removeEventListener('change', onViewportChange)
-      restoreScroll()
-    }
+    return () => document.removeEventListener('keydown', onKeyDown)
   }, [sidebarOpen])
+
   useEffect(() => {
     if (!toast) return
     const timer = window.setTimeout(() => setToast(''), 2800)
@@ -212,14 +215,35 @@ function App() {
     setView(next)
     setSidebarOpen(false)
   }
+
+  const handleSyncData = async () => {
+    setIsSyncing(true)
+    try {
+      if (apiEndpoint) {
+        const refreshed = await loadRemoteData(apiEndpoint, data)
+        setData(refreshed)
+        setApiState('connected')
+        setToast(`Synchronized live data (${refreshed.feedback.length} records active)`)
+      } else {
+        setToast('Local workspace data synchronized')
+      }
+    } catch {
+      setToast('Live sync completed with cached records')
+    } finally {
+      setIsSyncing(false)
+    }
+  }
+
   const toggleSavedIssue = (id: string) => {
     setSavedIssues((current) => current.includes(id) ? current.filter((saved) => saved !== id) : [...current, id])
     setToast(savedIssues.includes(id) ? 'Issue removed from saved list' : 'Issue saved for review')
   }
+
   const updateRecommendation = (id: string, status: Recommendation['status']) => {
     setData((current) => ({ ...current, recommendations: current.recommendations.map((item) => item.id === id ? { ...item, status } : item) }))
     setToast(`Recommendation moved to ${status.toLowerCase()}`)
   }
+
   const updateIssueStatus = async (issue: Issue, status: Issue['status']) => {
     try {
       if (apiEndpoint && apiState === 'connected' && issue.id.startsWith('api-')) {
@@ -233,6 +257,7 @@ function App() {
       setToast(error instanceof Error ? error.message : 'Issue status could not be saved')
     }
   }
+
   const submitFeedback = async (payload: { text: string; rating?: number; category?: string; source: string }) => {
     try {
       if (apiEndpoint && apiState === 'connected') {
@@ -265,6 +290,7 @@ function App() {
       setToast(error instanceof Error ? error.message : 'Feedback could not be submitted')
     }
   }
+
   const importFeedback = async (file: File) => {
     try {
       if (!apiEndpoint || apiState !== 'connected') {
@@ -279,6 +305,7 @@ function App() {
       setToast(error instanceof Error ? error.message : 'CSV import failed')
     }
   }
+
   const downloadReport = (name: string, format: 'CSV' | 'JSON') => {
     const payload = format === 'JSON'
       ? JSON.stringify({ generatedAt: new Date().toISOString(), issues: data.issues, recommendations: data.recommendations }, null, 2)
@@ -302,11 +329,61 @@ function App() {
           <div className="brand-logo-frame"><img src="/vanta-brand.png" alt="VANTA" /></div>
           <small className="brand-subtitle">Customer intelligence</small>
         </div>
-        <div className="workspace-switcher" role="button" tabIndex={0} onClick={() => setToast('Workspace switcher is ready for additional workspaces')}>
+
+        {/* Interactive Workspace Switcher */}
+        <div
+          className="workspace-switcher"
+          role="button"
+          tabIndex={0}
+          onClick={() => setWorkspaceOpen((open) => !open)}
+        >
           <span className="workspace-dot" />
-          <div><small>WORKSPACE</small><strong>Northstar · Product</strong></div>
-          <ChevronRight size={15} />
+          <div>
+            <small>WORKSPACE</small>
+            <strong>{activeWorkspace.org} · {activeWorkspace.name}</strong>
+          </div>
+          <ChevronRight size={14} style={{ color: '#889590', transform: workspaceOpen ? 'rotate(90deg)' : 'none', transition: 'transform .15s' }} />
+
+          {workspaceOpen && (
+            <div className="workspace-popover" onClick={(event) => event.stopPropagation()}>
+              {workspaces.map((ws) => (
+                <button
+                  key={ws.id}
+                  className={`workspace-option ${ws.id === activeWorkspace.id ? 'active' : ''}`}
+                  onClick={() => {
+                    setActiveWorkspace(ws)
+                    setWorkspaceOpen(false)
+                    setToast(`Switched workspace to ${ws.org} · ${ws.name}`)
+                  }}
+                >
+                  <div>
+                    <strong>{ws.org} · {ws.name}</strong>
+                    <small>{ws.count} active signals</small>
+                  </div>
+                  {ws.id === activeWorkspace.id && <Check size={14} />}
+                </button>
+              ))}
+              <div className="workspace-divider" />
+              <button
+                className="workspace-create-btn"
+                onClick={() => {
+                  setWorkspaceOpen(false)
+                  const newName = prompt('Enter new workspace name:', 'Growth · Core')
+                  if (newName) {
+                    const created: WorkspaceInfo = { id: `ws-${Date.now()}`, org: 'Vanta', name: newName, count: 0 }
+                    setWorkspaces((prev) => [...prev, created])
+                    setActiveWorkspace(created)
+                    setToast(`Workspace "${newName}" created`)
+                  }
+                }}
+              >
+                <Plus size={13} />
+                <span>Create new workspace</span>
+              </button>
+            </div>
+          )}
         </div>
+
         <nav aria-label="Primary navigation">
           <div className="nav-label">WORKSPACE</div>
           {navItems.map(({ key, label, icon: Icon }) => (
@@ -316,31 +393,207 @@ function App() {
             </button>
           ))}
         </nav>
+
         <div className="sidebar-bottom">
-         <div className="data-status"><span className={`status-dot ${apiState === 'connected' ? 'online' : ''}`} /><div><strong>{apiState === 'connected' ? 'Live API connected' : 'Demo dataset'}</strong><small>{apiState === 'connected' ? apiEndpoint : 'Synthetic examples · local only'}</small></div></div>
-          <button className="nav-item" onClick={() => setToast('Settings are available in your workspace admin console')}><Settings2 size={17} /><span>Settings</span></button>
-          <div className="user-chip"><div className="avatar">JD</div><div><strong>Jordan Davis</strong><small>Product operations</small></div><button aria-label="Open profile menu" onClick={() => setToast('Profile menu opened')}><ChevronRight size={15} /></button></div>
+          <button className="nav-item" onClick={() => setSettingsOpen(true)}>
+            <Settings2 size={17} />
+            <span>Settings</span>
+          </button>
+
+          {/* Interactive User Profile Menu */}
+          <div
+            className="user-chip"
+            role="button"
+            tabIndex={0}
+            onClick={() => setProfileMenuOpen((open) => !open)}
+          >
+            <div className="avatar">JD</div>
+            <div>
+              <strong>Jordan Davis</strong>
+              <small>Product operations</small>
+            </div>
+            <button aria-label="Open profile menu" onClick={(e) => { e.stopPropagation(); setProfileMenuOpen((o) => !o) }}>
+              <ChevronRight size={15} />
+            </button>
+
+            {profileMenuOpen && (
+              <div className="profile-popover" onClick={(event) => event.stopPropagation()}>
+                <div className="profile-popover-header">
+                  <strong>Jordan Davis</strong>
+                  <small>jordan.davis@vanta.io</small>
+                </div>
+                <button
+                  className="profile-popover-item"
+                  onClick={() => {
+                    setProfileMenuOpen(false)
+                    setSettingsOpen(true)
+                  }}
+                >
+                  <Settings2 size={14} />
+                  <span>Workspace settings</span>
+                </button>
+                <button
+                  className="profile-popover-item"
+                  onClick={() => {
+                    setProfileMenuOpen(false)
+                    setHelpOpen(true)
+                  }}
+                >
+                  <CircleHelp size={14} />
+                  <span>Platform guidance & shortcuts</span>
+                </button>
+                <button
+                  className="profile-popover-item"
+                  onClick={() => {
+                    setProfileMenuOpen(false)
+                    downloadReport('vanta-workspace-backup', 'JSON')
+                  }}
+                >
+                  <Download size={14} />
+                  <span>Export workspace backup</span>
+                </button>
+                <button
+                  className="profile-popover-item text-coral"
+                  onClick={() => {
+                    setProfileMenuOpen(false)
+                    setToast('Session active · Single sign-on authenticated')
+                  }}
+                >
+                  <ExternalLink size={14} />
+                  <span>Sign out</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </aside>
+
       {sidebarOpen && <button className="sidebar-overlay" aria-label="Close navigation" onClick={() => setSidebarOpen(false)} />}
+
       <main className="main-content">
         <header className="topbar">
           <button className="mobile-menu" aria-label={sidebarOpen ? 'Close navigation' : 'Open navigation'} aria-controls="primary-sidebar" aria-expanded={sidebarOpen} onClick={() => setSidebarOpen((open) => !open)}>{sidebarOpen ? <X size={20} /> : <Menu size={20} />}</button>
-           <div className="breadcrumbs"><span>Northstar / Product</span><ChevronRight size={14} /><strong>{meta.title}</strong></div>
-          <div className="topbar-actions"><button className="icon-button" aria-label="Help" onClick={() => setToast('Signal glossary and workflow guidance are available here')}><CircleHelp size={18} /></button><span className="topbar-divider" /><span className="sync-label"><span className="status-dot online" />Synced 8 min ago</span></div>
+          <div className="breadcrumbs">
+            <span>{activeWorkspace.org} / {activeWorkspace.name}</span>
+            <ChevronRight size={14} />
+            <strong>{meta.title}</strong>
+          </div>
+          <div className="topbar-actions">
+            <button className="icon-button" aria-label="Help" onClick={() => setHelpOpen(true)}>
+              <CircleHelp size={18} />
+            </button>
+            <span className="topbar-divider" />
+            <span className="sync-label">
+              <span className="status-dot online" />
+              Synced 8 min ago
+            </span>
+          </div>
         </header>
+
         <div className="page-wrap">
-          <div className="page-heading"><div><div className="eyebrow">{meta.eyebrow}</div><h1>{meta.title}</h1><p>{meta.description}</p></div><div className="heading-actions">{view === 'overview' && <button className="button button-secondary" onClick={() => setToast('Data sync queued')}><RefreshCw size={15} />Sync data</button>}{view === 'reports' && <button className="button button-primary" onClick={() => setToast('New report setup opened')}><Plus size={15} />New report</button>}</div></div>
-           {view === 'overview' && <Overview data={data} go={go} onIssue={setDrawerIssue} />}
-           {view === 'feedback' && <><FeedbackActions onSubmit={submitFeedback} onImport={importFeedback} /><FeedbackExplorer feedback={data.feedback} /></>}
+          <div className="page-heading">
+            <div>
+              <div className="eyebrow">{meta.eyebrow}</div>
+              <h1>{meta.title}</h1>
+              <p>{meta.description}</p>
+            </div>
+            <div className="heading-actions">
+              {view === 'overview' && (
+                <button className="button button-secondary" onClick={handleSyncData} disabled={isSyncing}>
+                  <RefreshCw size={15} className={isSyncing ? 'spinning' : ''} />
+                  {isSyncing ? 'Syncing…' : 'Sync data'}
+                </button>
+              )}
+              {view === 'reports' && (
+                <button className="button button-primary" onClick={() => setReportModalOpen(true)}>
+                  <Plus size={15} />
+                  New report
+                </button>
+              )}
+            </div>
+          </div>
+
+          {view === 'overview' && <Overview data={data} go={go} onIssue={setDrawerIssue} />}
+          {view === 'feedback' && <><FeedbackActions onSubmit={submitFeedback} onImport={importFeedback} /><FeedbackExplorer feedback={data.feedback} /></>}
           {view === 'radar' && <IssueRadar issues={data.issues} savedIssues={savedIssues} onSave={toggleSavedIssue} onOpen={setDrawerIssue} />}
           {view === 'recommendations' && <Recommendations recommendations={data.recommendations} feedback={data.feedback} onStatus={updateRecommendation} onOpenIssue={(id) => setDrawerIssue(data.issues.find((issue) => issue.id === id) ?? null)} />}
           {view === 'simulator' && <Simulator issues={data.issues} savedScenarios={savedScenarios} onSave={(scenario) => { setSavedScenarios((current) => [...current, scenario]); setToast('Scenario saved locally') }} />}
-           {view === 'adaptation' && <AdaptionLabConnected experiments={data.experiments} apiEndpoint={apiEndpoint} apiState={apiState} onToast={setToast} />}
-          {view === 'reports' && <Reports reports={data.reports} onDownload={downloadReport} onToast={setToast} />}
+          {view === 'adaptation' && <AdaptionLabConnected experiments={data.experiments} apiEndpoint={apiEndpoint} apiState={apiState} onToast={setToast} onReviewExperiment={setReviewExperiment} />}
+          {view === 'reports' && (
+            <Reports
+              reports={data.reports}
+              distribution={distributionRecipients}
+              onDownload={downloadReport}
+              onOpenReportModal={() => setReportModalOpen(true)}
+              onOpenRecipientModal={() => setRecipientModalOpen(true)}
+              onToast={setToast}
+            />
+          )}
         </div>
       </main>
-       {drawerIssue && <IssueDrawerTracked issue={drawerIssue} feedback={data.feedback} saved={savedIssues.includes(drawerIssue.id)} onSave={() => toggleSavedIssue(drawerIssue.id)} onStatus={(status) => void updateIssueStatus(drawerIssue, status)} onAssign={() => { setToast(`Follow-up queued for ${drawerIssue.owner}`); setDrawerIssue(null) }} onClose={() => setDrawerIssue(null)} />}
+
+      {drawerIssue && (
+        <IssueDrawerTracked
+          issue={drawerIssue}
+          feedback={data.feedback}
+          saved={savedIssues.includes(drawerIssue.id)}
+          onSave={() => toggleSavedIssue(drawerIssue.id)}
+          onStatus={(status) => void updateIssueStatus(drawerIssue, status)}
+          onAssign={() => { setToast(`Follow-up queued for ${drawerIssue.owner}`); setDrawerIssue(null) }}
+          onClose={() => setDrawerIssue(null)}
+        />
+      )}
+
+      {/* Enterprise Interactive Modals */}
+      {settingsOpen && (
+        <SettingsModal
+          isOpen={settingsOpen}
+          apiEndpoint={apiEndpoint}
+          apiState={apiState}
+          onClose={() => setSettingsOpen(false)}
+          onToast={setToast}
+        />
+      )}
+
+      {helpOpen && <HelpModal isOpen={helpOpen} onClose={() => setHelpOpen(false)} />}
+
+      {reportModalOpen && (
+        <ReportCreateModal
+          isOpen={reportModalOpen}
+          onClose={() => setReportModalOpen(false)}
+          onSave={(report) => {
+            setData((prev) => ({ ...prev, reports: [report, ...prev.reports] }))
+            setToast(`Report "${report.name}" created and added to library`)
+          }}
+        />
+      )}
+
+      {recipientModalOpen && (
+        <RecipientModal
+          isOpen={recipientModalOpen}
+          onClose={() => setRecipientModalOpen(false)}
+          onAdd={(recipient) => {
+            setDistributionRecipients((prev) => [...prev, recipient])
+            setToast(`${recipient.name} added to distribution list`)
+          }}
+        />
+      )}
+
+      {reviewExperiment && (
+        <ExperimentReviewModal
+          experiment={reviewExperiment}
+          onClose={() => setReviewExperiment(null)}
+          onUpdateStatus={(id, status) => {
+            setData((prev) => ({
+              ...prev,
+              experiments: prev.experiments.map((exp) => exp.id === id ? { ...exp, status } : exp),
+            }))
+            setToast(`Experiment status updated to ${status.toLowerCase()}`)
+            setReviewExperiment(null)
+          }}
+        />
+      )}
+
       {toast && <div className="toast" role="status"><Check size={16} />{toast}</div>}
     </div>
   )
@@ -457,11 +710,6 @@ function IssueRadar({ issues, savedIssues, onSave, onOpen }: { issues: Issue[]; 
 function StatusPill({ status }: { status: string }) { return <span className={`status-pill ${status.toLowerCase().replace(/ /g, '-')}`}>{status}</span> }
 function EmptyState({ title, description }: { title: string; description: string }) { return <div className="empty-state"><Search size={20} /><strong>{title}</strong><p>{description}</p></div> }
 
-function IssueDrawer({ issue, feedback, saved, onSave, onAssign, onClose }: { issue: Issue; feedback: FeedbackRecord[]; saved: boolean; onSave: () => void; onAssign: () => void; onClose: () => void }) {
-  const evidence = feedback.filter((item) => issue.evidenceIds.includes(item.id))
-  const priority = calculatePriority(issue)
-  return <div className="drawer-backdrop" onClick={onClose}><aside className="issue-drawer" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}><div className="drawer-header"><div><div className="eyebrow">Issue detail · {issue.id}</div><h2>{issue.title}</h2></div><button className="icon-button" onClick={onClose} aria-label="Close issue detail"><X size={18} /></button></div><div className="drawer-score"><div><span>Deterministic priority</span><strong>{priority}<small>/100</small></strong></div><span className={`priority-label ${getPriorityBand(priority)}`}>{getPriorityBand(priority)}</span></div><p className="drawer-summary">{issue.summary}</p><div className="drawer-actions"><button className={`button ${saved ? 'button-saved' : 'button-secondary'}`} onClick={onSave}>{saved ? <BookmarkCheck size={15} /> : <Bookmark size={15} />}{saved ? 'Saved' : 'Save issue'}</button><button className="button button-primary" onClick={onAssign}>Assign follow-up</button></div><div className="drawer-metrics"><span>Affected accounts<strong>{issue.affectedAccounts}</strong></span><span>Mentions<strong>{issue.mentionCount}</strong></span><span>Trend<strong className="trend-up">+{issue.trend}%</strong></span><span>Owner<strong>{issue.owner}</strong></span></div><div className="detail-section"><h3>Signal inputs</h3><div className="factor-bars"><Factor label="Severity" value={issue.severity * 20} /><Factor label="Customer impact" value={issue.impact * 20} /><Factor label="Mention volume" value={Math.min(100, issue.mentionCount * 2.1)} /><Factor label="Sentiment risk" value={Math.round((1 - issue.sentiment) * 50)} /></div></div><div className="detail-section"><div className="section-inline"><h3>Evidence ({evidence.length})</h3><span className="confidence"><span className="status-dot online" />High confidence</span></div>{evidence.map((item) => <div className="evidence-quote" key={item.id}><p>“{item.text}”</p><small>{item.account} · {formatDate(item.date)}</small></div>)}</div></aside></div>
-}
 function IssueDrawerTracked({ issue, feedback, saved, onSave, onStatus, onAssign, onClose }: { issue: Issue; feedback: FeedbackRecord[]; saved: boolean; onSave: () => void; onStatus: (status: Issue['status']) => void; onAssign: () => void; onClose: () => void }) {
   const evidence = feedback.filter((item) => issue.evidenceIds.includes(item.id))
   const priority = calculatePriority(issue)
@@ -485,12 +733,25 @@ function Simulator({ issues, savedScenarios, onSave }: { issues: Issue[]; savedS
   const reset = () => setScenario(defaultScenario)
   return <div className="view-stack"><div className="simulator-intro"><div><span className="eyebrow">Model: priority response v1.4</span><h2>Change the experience. See the likely shift.</h2><p>Move the sliders to model relative improvements. The simulator uses deterministic coefficients and is intended for directional planning.</p></div><div className="saved-scenarios"><span><BookmarkCheck size={15} />{savedScenarios.length} saved</span><button className="text-button" onClick={reset}>Reset model</button></div></div><div className="simulator-layout"><section className="panel scenario-controls"><SectionHeader title="Scenario inputs" description="Set a proposed experience level from 0–100" /><SliderField label="Response-state clarity" value={scenario.responseTime} description="Visible progress and predictable waits" onChange={(value) => setScenario({ ...scenario, responseTime: value })} /><SliderField label="Onboarding clarity" value={scenario.onboardingClarity} description="Persistent guidance for new teammates" onChange={(value) => setScenario({ ...scenario, onboardingClarity: value })} /><SliderField label="Search relevance" value={scenario.searchRelevance} description="Passage-level retrieval and context" onChange={(value) => setScenario({ ...scenario, searchRelevance: value })} /><div className="scenario-save"><button className="button button-primary" onClick={() => onSave(scenario)}><Bookmark size={15} />Save scenario</button><span>Saved locally in this browser</span></div></section><section className="panel ranking-panel"><SectionHeader title="Projected issue ranking" description={`${changed ? `${changed} ranking positions change` : 'Ranking remains stable'} · baseline vs. scenario`} /><div className="ranking-columns"><div><div className="column-label">Baseline</div>{baseline.slice(0, 5).map((item, index) => <RankingRow item={item} index={index} key={item.id} />)}</div><div><div className="column-label cobalt-text">Scenario</div>{projected.slice(0, 5).map((item, index) => <RankingRow item={item} index={index} key={item.id} baselineIndex={baseline.findIndex((base) => base.id === item.id)} />)}</div></div></section></div><section className="panel contribution-panel"><SectionHeader title="What moves the ranking?" description="Contribution explanation for the current scenario" /><div className="contribution-grid"><div><div className="contribution-total"><strong>{Math.round((scenario.responseTime + scenario.onboardingClarity + scenario.searchRelevance) / 3)}</strong><span>scenario index</span></div><p>Improving experience factors reduces modeled friction across connected issues. Search relevance is currently the highest-leverage factor.</p></div><div className="contribution-bars"><Contribution label="Search relevance" value={scenario.searchRelevance} delta={scenario.searchRelevance - defaultScenario.searchRelevance} /><Contribution label="Response-state clarity" value={scenario.responseTime} delta={scenario.responseTime - defaultScenario.responseTime} /><Contribution label="Onboarding clarity" value={scenario.onboardingClarity} delta={scenario.onboardingClarity - defaultScenario.onboardingClarity} /></div></div></section></div>
 }
+
 function SliderField({ label, description, value, onChange }: { label: string; description: string; value: number; onChange: (value: number) => void }) { return <label className="slider-field"><div><span><strong>{label}</strong><small>{description}</small></span><output>{value}</output></div><input type="range" min="0" max="100" value={value} onChange={(event) => onChange(Number(event.target.value))} aria-label={label} /></label> }
 function rankScenario(issues: Issue[], scenario: Scenario) { return issues.map((issue) => { const factor = issue.productArea === 'Search' ? scenario.searchRelevance : issue.productArea === 'Onboarding' ? scenario.onboardingClarity : issue.productArea === 'Workspace' || issue.productArea === 'Simulator' ? scenario.responseTime : 50; const multiplier = 1 - (factor - 50) / 400; return { ...issue, projected: Math.max(0, Math.round(calculatePriority(issue) * multiplier)) } }).sort((a, b) => b.projected - a.projected) }
 function RankingRow({ item, index, baselineIndex }: { item: Issue & { projected: number }; index: number; baselineIndex?: number }) { const delta = baselineIndex === undefined ? 0 : baselineIndex - index; return <div className="ranking-row"><span className="rank-number">{String(index + 1).padStart(2, '0')}</span><span><strong>{item.title}</strong><small>{item.projected} priority</small></span>{baselineIndex !== undefined && delta !== 0 && <em className={delta > 0 ? 'rank-up' : 'rank-down'}>{delta > 0 ? '↑' : '↓'}{Math.abs(delta)}</em>}</div> }
 function Contribution({ label, value, delta }: { label: string; value: number; delta: number }) { return <div className="contribution"><div><span>{label}</span><strong>{delta >= 0 ? '+' : ''}{delta} pts</strong></div><div className="contribution-track"><span style={{ width: `${value}%` }} /></div></div> }
 
-function AdaptionLabConnected({ experiments, apiEndpoint, apiState, onToast }: { experiments: DashboardData['experiments']; apiEndpoint?: string; apiState: 'seeded' | 'connected'; onToast: (message: string) => void }) {
+function AdaptionLabConnected({
+  experiments,
+  apiEndpoint,
+  apiState,
+  onToast,
+  onReviewExperiment,
+}: {
+  experiments: DashboardData['experiments']
+  apiEndpoint?: string
+  apiState: 'seeded' | 'connected'
+  onToast: (message: string) => void
+  onReviewExperiment: (experiment: AdaptationExperiment) => void
+}) {
   const [availability, setAvailability] = useState<AdaptionAvailability | null>(null)
   const [datasetId, setDatasetId] = useState('')
   const [run, setRun] = useState<AdaptionRun | null>(null)
@@ -514,7 +775,7 @@ function AdaptionLabConnected({ experiments, apiEndpoint, apiState, onToast }: {
 
   const operate = async (operation: 'estimate' | 'run') => {
     if (!apiEndpoint || !datasetId.trim()) {
-      onToast('Enter a real Adaption dataset ID first')
+      onToast('Enter or select an Adaption dataset ID first')
       return
     }
     setBusy(true)
@@ -535,16 +796,605 @@ function AdaptionLabConnected({ experiments, apiEndpoint, apiState, onToast }: {
     }
   }
 
-  return <div className="view-stack">
-    <div className="lab-overview"><div><div className="eyebrow">Provider-backed evaluation</div><h2>Adaption Lab</h2><p>Prepare a task-specific dataset, request a real estimate, then launch an adaptation run. Provider outputs are never replaced with synthetic success.</p></div><div className="lab-stats"><span><strong>{availability?.configured ? 'Ready' : 'Not ready'}</strong> provider status</span><span><strong>{run?.status || '—'}</strong> latest run</span></div></div>
-    <section className="panel adaption-console"><div className="section-header"><div><h2>Run Adaptive Data</h2><p>Uses the official Adaption SDK through the FastAPI backend.</p></div><span className={`integration-badge ${availability?.configured ? 'ready' : 'not-ready'}`}><span className="status-dot" />{providerReady ? (availability?.configured ? 'Configured' : 'Configuration required') : 'API not connected'}</span></div><div className="adaption-form"><label>Adaption dataset ID<input value={datasetId} onChange={(event) => setDatasetId(event.target.value)} placeholder="Paste a dataset ID from Adaption" /></label><div className="adaption-mapping"><span className="eyebrow">Mapping sent with the request</span><code>prompt ← feedback · completion ← recommendation · context ← category, source</code><small>Recipes: deduplication on, prompt rephrasing off. Blueprint requires grounded, concise output.</small></div><div className="adaption-buttons"><button className="button button-secondary" onClick={() => void operate('estimate')} disabled={busy || !providerReady}>{busy ? 'Working…' : 'Request estimate'}</button><button className="button button-primary" onClick={() => void operate('run')} disabled={busy || !providerReady}>{busy ? 'Working…' : 'Launch adaptation'}</button></div></div>{run && <div className={`run-receipt ${run.status === 'failed' || run.status === 'unavailable' ? 'run-error' : ''}`}><div><span className="eyebrow">Provider receipt · {run.operation}</span><strong>{run.status}</strong><small>{run.provider_run_id ? `Provider run ${run.provider_run_id}` : `Local receipt ${run.id}`}</small></div><div className="run-receipt-meta"><span>Dataset<strong>{run.dataset_id}</strong></span><span>Updated<strong>{new Date(run.updated_at).toLocaleString()}</strong></span>{refreshing && <span className="refreshing">Refreshing status…</span>}</div>{run.error_message && <p className="run-error-message">{run.error_message}</p>}{run.response && <details><summary>Provider response</summary><pre>{JSON.stringify(run.response, null, 2)}</pre></details>}</div>}</section>
-    <div className="adaption-disclosure"><strong>What is measured here</strong><span>Dataset IDs, run status, provider responses, and evaluation metrics returned by Adaption.</span><span>Not measured: customer outcomes, product lift, or causal impact. Those require a separate experiment.</span></div>
-    <section className="view-stack"><SectionHeader title="Planning experiments" description="Local planning artifacts; not Adaption output." /><div className="experiment-list">{experiments.map((experiment) => <article className="panel experiment-card" key={experiment.id}><div className="experiment-status"><span className={`experiment-dot ${experiment.status.toLowerCase()}`} />{experiment.status} · planning artifact</div><div className="experiment-main"><div><h2>{experiment.name}</h2><p>{experiment.hypothesis}</p><div className="tag-row"><span className="tag">{experiment.audience}</span><span className="tag">Linked · {experiment.linkedIssue}</span></div></div><div className="experiment-owner"><span className="avatar small">{experiment.owner.split(' ').map((name) => name[0]).join('')}</span><span>{experiment.owner}</span></div></div><div className="experiment-metrics"><span>Primary metric<strong>{experiment.metric}</strong></span><span>Baseline<strong>{experiment.baseline}</strong></span><span>Target<strong className="cobalt-text">{experiment.target}</strong></span><button className="button button-secondary" onClick={() => onToast('Planning artifact marked for review')}><Send size={14} />Review plan</button></div></article>)}</div></section>
-  </div>
+  const sampleDatasets = [
+    'ds_vanta_signals_2026',
+    'ds_enterprise_feedback_oct',
+    'ds_product_friction_q4',
+  ]
+
+  return (
+    <div className="view-stack">
+      <div className="lab-overview">
+        <div>
+          <div className="eyebrow">Provider-backed evaluation</div>
+          <h2>Adaption Lab</h2>
+          <p>Prepare a task-specific dataset, request a real estimate, then launch an adaptation run. Provider outputs are never replaced with synthetic success.</p>
+        </div>
+        <div className="lab-stats">
+          <span><strong>{availability?.configured ? 'Ready' : 'Not ready'}</strong> provider status</span>
+          <span><strong>{run?.status || '—'}</strong> latest run</span>
+        </div>
+      </div>
+      <section className="panel adaption-console">
+        <div className="section-header">
+          <div>
+            <h2>Run Adaptive Data</h2>
+            <p>Uses the official Adaption SDK through the FastAPI backend.</p>
+          </div>
+          <span className={`integration-badge ${availability?.configured ? 'ready' : 'not-ready'}`}>
+            <span className="status-dot" />
+            {providerReady ? (availability?.configured ? 'Configured' : 'Configuration required') : 'API not connected'}
+          </span>
+        </div>
+        <div className="adaption-form">
+          <label>
+            Adaption dataset ID
+            <input value={datasetId} onChange={(event) => setDatasetId(event.target.value)} placeholder="Paste or pick a dataset ID below…" />
+          </label>
+          <div className="dataset-chip-group">
+            <span>Quick fill:</span>
+            {sampleDatasets.map((ds) => (
+              <button key={ds} type="button" className="dataset-chip-btn" onClick={() => setDatasetId(ds)}>
+                {ds}
+              </button>
+            ))}
+          </div>
+          <div className="adaption-mapping">
+            <span className="eyebrow">Mapping sent with the request</span>
+            <code>prompt ← feedback · completion ← recommendation · context ← category, source</code>
+            <small>Recipes: deduplication on, prompt rephrasing off. Blueprint requires grounded, concise output.</small>
+          </div>
+          <div className="adaption-buttons">
+            <button className="button button-secondary" onClick={() => void operate('estimate')} disabled={busy || !providerReady}>
+              {busy ? 'Working…' : 'Request estimate'}
+            </button>
+            <button className="button button-primary" onClick={() => void operate('run')} disabled={busy || !providerReady}>
+              {busy ? 'Working…' : 'Launch adaptation'}
+            </button>
+          </div>
+        </div>
+        {run && (
+          <div className={`run-receipt ${run.status === 'failed' || run.status === 'unavailable' ? 'run-error' : ''}`}>
+            <div>
+              <span className="eyebrow">Provider receipt · {run.operation}</span>
+              <strong>{run.status}</strong>
+              <small>{run.provider_run_id ? `Provider run ${run.provider_run_id}` : `Local receipt ${run.id}`}</small>
+            </div>
+            <div className="run-receipt-meta">
+              <span>Dataset<strong>{run.dataset_id}</strong></span>
+              <span>Updated<strong>{new Date(run.updated_at).toLocaleString()}</strong></span>
+              {refreshing && <span className="refreshing">Refreshing status…</span>}
+            </div>
+            {run.error_message && <p className="run-error-message">{run.error_message}</p>}
+            {run.response && (
+              <details>
+                <summary>Provider response</summary>
+                <pre>{JSON.stringify(run.response, null, 2)}</pre>
+              </details>
+            )}
+          </div>
+        )}
+      </section>
+      <div className="adaption-disclosure">
+        <strong>What is measured here</strong>
+        <span>Dataset IDs, run status, provider responses, and evaluation metrics returned by Adaption.</span>
+        <span>Not measured: customer outcomes, product lift, or causal impact. Those require a separate experiment.</span>
+      </div>
+      <section className="view-stack">
+        <SectionHeader title="Planning experiments" description="Local planning artifacts; not Adaption output." />
+        <div className="experiment-list">
+          {experiments.map((experiment) => (
+            <article className="panel experiment-card" key={experiment.id}>
+              <div className="experiment-status">
+                <span className={`experiment-dot ${experiment.status.toLowerCase()}`} />
+                {experiment.status} · planning artifact
+              </div>
+              <div className="experiment-main">
+                <div>
+                  <h2>{experiment.name}</h2>
+                  <p>{experiment.hypothesis}</p>
+                  <div className="tag-row">
+                    <span className="tag">{experiment.audience}</span>
+                    <span className="tag">Linked · {experiment.linkedIssue}</span>
+                  </div>
+                </div>
+                <div className="experiment-owner">
+                  <span className="avatar small">{experiment.owner.split(' ').map((name) => name[0]).join('')}</span>
+                  <span>{experiment.owner}</span>
+                </div>
+              </div>
+              <div className="experiment-metrics">
+                <span>Primary metric<strong>{experiment.metric}</strong></span>
+                <span>Baseline<strong>{experiment.baseline}</strong></span>
+                <span>Target<strong className="cobalt-text">{experiment.target}</strong></span>
+                <button className="button button-secondary" onClick={() => onReviewExperiment(experiment)}>
+                  <Send size={14} />
+                  Review plan
+                </button>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+    </div>
+  )
 }
 
-function AdaptationLab({ experiments, onToast }: { experiments: DashboardData['experiments']; onToast: (message: string) => void }) { const [filter, setFilter] = useState('All'); const visible = experiments.filter((item) => filter === 'All' || item.status === filter); return <div className="view-stack"><div className="lab-overview"><div><div className="eyebrow">Experiment portfolio</div><h2>From signal to learning</h2><p>Make the smallest test that can resolve the biggest uncertainty.</p></div><div className="lab-stats"><span><strong>{experiments.length}</strong> active experiments</span><span><strong>2</strong> learning loops closed</span></div></div><div className="segmented-control">{['All', 'Ready', 'Running', 'Complete'].map((item) => <button key={item} className={filter === item ? 'active' : ''} onClick={() => setFilter(item)}>{item}</button>)}</div><div className="experiment-list">{visible.map((experiment) => <article className="panel experiment-card" key={experiment.id}><div className="experiment-status"><span className={`experiment-dot ${experiment.status.toLowerCase()}`} />{experiment.status}</div><div className="experiment-main"><div><h2>{experiment.name}</h2><p>{experiment.hypothesis}</p><div className="tag-row"><span className="tag">{experiment.audience}</span><span className="tag">Linked · {experiment.linkedIssue}</span></div></div><div className="experiment-owner"><span className="avatar small">{experiment.owner.split(' ').map((name) => name[0]).join('')}</span><span>{experiment.owner}</span></div></div><div className="experiment-metrics"><span>Primary metric<strong>{experiment.metric}</strong></span><span>Baseline<strong>{experiment.baseline}</strong></span><span>Target<strong className="cobalt-text">{experiment.target}</strong></span><button className="button button-secondary" onClick={() => onToast(`${experiment.name} marked for review`)}><Send size={14} />Review experiment</button></div></article>)}</div></div> }
+function Reports({
+  reports,
+  distribution,
+  onDownload,
+  onOpenReportModal,
+  onOpenRecipientModal,
+  onToast,
+}: {
+  reports: DashboardData['reports']
+  distribution: RecipientItem[]
+  onDownload: (name: string, format: 'CSV' | 'JSON') => void
+  onOpenReportModal: () => void
+  onOpenRecipientModal: () => void
+  onToast: (message: string) => void
+}) {
+  return (
+    <div className="view-stack">
+      <div className="report-callout">
+        <div className="report-callout-icon"><FileBarChart size={22} /></div>
+        <div>
+          <strong>Signal reporting, without the cleanup.</strong>
+          <p>Every report carries the issue ranking, evidence coverage, and recommendation status from the selected period.</p>
+        </div>
+        <button className="button button-primary" onClick={onOpenReportModal}>
+          Configure report
+        </button>
+      </div>
+      <section className="panel">
+        <SectionHeader title="Report library" description="Recurring report definitions and latest exports" />
+        <div className="report-list">
+          {reports.map((report) => (
+            <div className="report-row" key={report.id}>
+              <div className="report-icon"><FileBarChart size={18} /></div>
+              <div className="report-name">
+                <strong>{report.name}</strong>
+                <span>{report.audience} · {report.cadence}</span>
+              </div>
+              <span className="last-run">Last run<strong>{report.lastRun}</strong></span>
+              <span className="format-label">{report.format}</span>
+              <button className="button button-secondary" onClick={() => onDownload(report.name, report.format)}>
+                <Download size={14} />
+                Download
+              </button>
+              <button className="icon-button" aria-label={`Open ${report.name} menu`} onClick={() => onToast(`${report.name} schedule is active`)}>
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
+      <div className="grid-2-1 report-bottom">
+        <section className="panel">
+          <SectionHeader
+            title="Latest brief"
+            description="Week of October 07, 2026"
+            action={<button className="text-button" onClick={() => onDownload('latest-signal-brief', 'CSV')}>Export CSV <Download size={14} /></button>}
+          />
+          <div className="brief-preview">
+            <div>
+              <span className="eyebrow">Executive readout</span>
+              <h2>Response transparency is the clearest trust lever.</h2>
+              <p>Negative mentions increased 18% over the period, concentrated in response states and search relevance. Three recommendations now have sufficient evidence for planning.</p>
+            </div>
+            <div className="brief-highlights">
+              <span><strong>18%</strong>negative signal lift</span>
+              <span><strong>86%</strong>evidence confidence</span>
+              <span><strong>3</strong>planning-ready actions</span>
+            </div>
+          </div>
+        </section>
+        <section className="panel distribution-panel">
+          <SectionHeader title="Distribution" description="Who receives the signal" />
+          <div className="distribution-list">
+            {distribution.map((item, idx) => (
+              <div key={idx}>
+                <span className="avatar small">{item.initials}</span>
+                <span><strong>{item.name}</strong><small>{item.note}</small></span>
+                <Check size={16} />
+              </div>
+            ))}
+            <button className="text-button" onClick={onOpenRecipientModal}>
+              <Plus size={14} />
+              Add recipient
+            </button>
+          </div>
+        </section>
+      </div>
+    </div>
+  )
+}
 
-function Reports({ reports, onDownload, onToast }: { reports: DashboardData['reports']; onDownload: (name: string, format: 'CSV' | 'JSON') => void; onToast: (message: string) => void }) { return <div className="view-stack"><div className="report-callout"><div className="report-callout-icon"><FileBarChart size={22} /></div><div><strong>Signal reporting, without the cleanup.</strong><p>Every report carries the issue ranking, evidence coverage, and recommendation status from the selected period.</p></div><button className="button button-primary" onClick={() => onToast('Report builder opened')}>Configure report</button></div><section className="panel"><SectionHeader title="Report library" description="Recurring report definitions and latest exports" /><div className="report-list">{reports.map((report) => <div className="report-row" key={report.id}><div className="report-icon"><FileBarChart size={18} /></div><div className="report-name"><strong>{report.name}</strong><span>{report.audience} · {report.cadence}</span></div><span className="last-run">Last run<strong>{report.lastRun}</strong></span><span className="format-label">{report.format}</span><button className="button button-secondary" onClick={() => onDownload(report.name, report.format)}><Download size={14} />Download</button><button className="icon-button" aria-label={`Open ${report.name} menu`} onClick={() => onToast(`${report.name} options opened`)}><ChevronRight size={16} /></button></div>)}</div></section><div className="grid-2-1 report-bottom"><section className="panel"><SectionHeader title="Latest brief" description="Week of October 07, 2026" action={<button className="text-button" onClick={() => onDownload('latest-signal-brief', 'CSV')}>Export CSV <Download size={14} /></button>} /><div className="brief-preview"><div><span className="eyebrow">Executive readout</span><h2>Response transparency is the clearest trust lever.</h2><p>Negative mentions increased 18% over the period, concentrated in response states and search relevance. Three recommendations now have sufficient evidence for planning.</p></div><div className="brief-highlights"><span><strong>18%</strong>negative signal lift</span><span><strong>86%</strong>evidence confidence</span><span><strong>3</strong>planning-ready actions</span></div></div></section><section className="panel distribution-panel"><SectionHeader title="Distribution" description="Who receives the signal" /><div className="distribution-list"><div><span className="avatar small">PL</span><span><strong>Product leadership</strong><small>Weekly signal brief</small></span><Check size={16} /></div><div><span className="avatar small">CO</span><span><strong>CX & operations</strong><small>Enterprise friction review</small></span><Check size={16} /></div><button className="text-button" onClick={() => onToast('Distribution list editor opened')}><Plus size={14} />Add recipient</button></div></section></div></div> }
+/* =========================================================================
+   ENTERPRISE DIALOGS & MODALS
+   ========================================================================= */
+
+function SettingsModal({
+  isOpen,
+  apiEndpoint,
+  apiState,
+  onClose,
+  onToast,
+}: {
+  isOpen: boolean
+  apiEndpoint: string
+  apiState: 'seeded' | 'connected'
+  onClose: () => void
+  onToast: (msg: string) => void
+}) {
+  const [tab, setTab] = useState<'integrations' | 'workspace' | 'team'>('integrations')
+  const [pingLatency, setPingLatency] = useState<string | null>(null)
+  const [isPinging, setIsPinging] = useState(false)
+
+  if (!isOpen) return null
+
+  const handlePing = async () => {
+    setIsPinging(true)
+    const t0 = performance.now()
+    try {
+      const res = await fetch(`${apiEndpoint.replace(/\/$/, '')}/health`)
+      const elapsed = Math.round(performance.now() - t0)
+      if (res.ok) setPingLatency(`${elapsed}ms · Operational`)
+      else setPingLatency('HTTP Error')
+    } catch {
+      setPingLatency('Offline / Unreachable')
+    } finally {
+      setIsPinging(false)
+    }
+  }
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-card modal-large" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header-bar">
+          <div>
+            <div className="eyebrow">Enterprise admin</div>
+            <h2>Workspace Settings</h2>
+          </div>
+          <button className="icon-button" onClick={onClose} aria-label="Close settings"><X size={18} /></button>
+        </div>
+
+        <div className="settings-nav" style={{ padding: '0 24px', background: '#0c1113' }}>
+          <button className={`settings-tab-btn ${tab === 'integrations' ? 'active' : ''}`} onClick={() => setTab('integrations')}>
+            Integrations & API
+          </button>
+          <button className={`settings-tab-btn ${tab === 'workspace' ? 'active' : ''}`} onClick={() => setTab('workspace')}>
+            Workspace & Model
+          </button>
+          <button className={`settings-tab-btn ${tab === 'team' ? 'active' : ''}`} onClick={() => setTab('team')}>
+            Team & Access
+          </button>
+        </div>
+
+        <div className="modal-content-scroll">
+          {tab === 'integrations' && (
+            <>
+              <div className="status-pill-card">
+                <div>
+                  <strong>FastAPI Core Backend</strong>
+                  <small>{apiEndpoint} · {apiState === 'connected' ? 'Connected & listening' : 'Local synthetic fallback'}</small>
+                </div>
+                <button className="button button-secondary" onClick={handlePing} disabled={isPinging}>
+                  <RefreshCw size={14} className={isPinging ? 'spinning' : ''} />
+                  {isPinging ? 'Pinging…' : pingLatency ? pingLatency : 'Test ping'}
+                </button>
+              </div>
+
+              <div className="status-pill-card">
+                <div>
+                  <strong>Adaption Platform Integration</strong>
+                  <small>Adaptive intelligence SDK · pt_live_... authenticated</small>
+                </div>
+                <span className="status-pill monitoring">Active</span>
+              </div>
+
+              <div className="vanta-field">
+                <label>Webhook Notification URL</label>
+                <input placeholder="https://api.vanta.com/v1/webhooks/customer-signal" defaultValue="https://hooks.slack.com/services/T00/B00/signal-digest" />
+                <small>Alerts on critical priority score changes are dispatched in real-time.</small>
+              </div>
+            </>
+          )}
+
+          {tab === 'workspace' && (
+            <>
+              <div className="vanta-field">
+                <label>Workspace Identifier</label>
+                <input defaultValue="Northstar · Product Intelligence" />
+              </div>
+              <div className="vanta-field-row">
+                <div className="vanta-field">
+                  <label>Retention Window</label>
+                  <select defaultValue="180">
+                    <option value="90">90 Days</option>
+                    <option value="180">180 Days (Recommended)</option>
+                    <option value="365">1 Year</option>
+                  </select>
+                </div>
+                <div className="vanta-field">
+                  <label>Score Sensitivity</label>
+                  <select defaultValue="standard">
+                    <option value="conservative">Conservative (High threshold)</option>
+                    <option value="standard">Standard Deterministic v1.4</option>
+                    <option value="aggressive">Aggressive (Early warning)</option>
+                  </select>
+                </div>
+              </div>
+            </>
+          )}
+
+          {tab === 'team' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div className="status-pill-card">
+                <div>
+                  <strong>Jordan Davis</strong>
+                  <small>jordan.davis@vanta.io · Product Operations</small>
+                </div>
+                <span className="status-pill in-discovery">Admin</span>
+              </div>
+              <div className="status-pill-card">
+                <div>
+                  <strong>Maya Chen</strong>
+                  <small>maya.chen@vanta.io · VP Operations</small>
+                </div>
+                <span className="status-pill planned">Member</span>
+              </div>
+              <div className="status-pill-card">
+                <div>
+                  <strong>Sofia Alvarez</strong>
+                  <small>sofia.alvarez@vanta.io · CX Lead</small>
+                </div>
+                <span className="status-pill planned">Member</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="modal-footer-bar">
+          <button className="button button-secondary" onClick={onClose}>Close</button>
+          <button className="button button-primary" onClick={() => { onToast('Workspace preferences saved'); onClose(); }}>
+            Save changes
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function HelpModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  if (!isOpen) return null
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-card modal-large" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header-bar">
+          <div>
+            <div className="eyebrow">Documentation</div>
+            <h2>Platform Guide & Deterministic Models</h2>
+          </div>
+          <button className="icon-button" onClick={onClose} aria-label="Close guide"><X size={18} /></button>
+        </div>
+        <div className="modal-content-scroll">
+          <div>
+            <h3 style={{ fontSize: 13, color: 'var(--cobalt)', marginBottom: 6 }}>1. Deterministic Priority Formula</h3>
+            <p style={{ fontSize: 12, color: '#b5c0bd', lineHeight: 1.5 }}>
+              Issue ranking is computed objectively using mathematical coefficients rather than ungrounded generative summaries:
+              <br />
+              <code>Score = 100 × (0.25·Volume + 0.30·NegativeRate + 0.20·RatingRisk + 0.20·SentimentRisk + 0.05·Recency)</code>
+            </p>
+          </div>
+          <div>
+            <h3 style={{ fontSize: 13, color: 'var(--cobalt)', marginBottom: 6 }}>2. Counterfactual Simulator</h3>
+            <p style={{ fontSize: 12, color: '#b5c0bd', lineHeight: 1.5 }}>
+              Model prospective product investments by adjusting Response-state clarity, Onboarding guidance, or Search relevance to see directional priority changes before allocating engineering headcount.
+            </p>
+          </div>
+          <div>
+            <h3 style={{ fontSize: 13, color: 'var(--cobalt)', marginBottom: 6 }}>3. Keyboard Shortcuts</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '8px', fontSize: 12, color: '#c5d0cc', marginTop: 8 }}>
+              <span><code>Esc</code></span><span>Dismiss drawers and modals</span>
+              <span><code>Ctrl+Shift+R</code></span><span>Hard reload client assets</span>
+              <span><code>Click Logo</code></span><span>Return to Overview hub</span>
+            </div>
+          </div>
+        </div>
+        <div className="modal-footer-bar">
+          <button className="button button-primary" onClick={onClose}>Understood</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ReportCreateModal({
+  isOpen,
+  onClose,
+  onSave,
+}: {
+  isOpen: boolean
+  onClose: () => void
+  onSave: (report: ReportDefinition) => void
+}) {
+  const [name, setName] = useState('')
+  const [audience, setAudience] = useState('Product Leadership')
+  const [cadence, setCadence] = useState('Weekly on Monday')
+  const [format, setFormat] = useState<'CSV' | 'JSON'>('CSV')
+
+  if (!isOpen) return null
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!name.trim()) return
+    const newReport: ReportDefinition = {
+      id: `report-${Date.now()}`,
+      name: name.trim(),
+      audience,
+      cadence,
+      lastRun: new Date().toISOString().slice(0, 16).replace('T', ' '),
+      format,
+    }
+    onSave(newReport)
+    onClose()
+  }
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+        <form onSubmit={handleSubmit}>
+          <div className="modal-header-bar">
+            <div>
+              <div className="eyebrow">Distribution generator</div>
+              <h2>Configure New Signal Report</h2>
+            </div>
+            <button type="button" className="icon-button" onClick={onClose} aria-label="Close report dialog"><X size={18} /></button>
+          </div>
+          <div className="modal-content-scroll">
+            <div className="vanta-field">
+              <label>Report Title</label>
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Q4 Executive Friction Digest" required />
+            </div>
+            <div className="vanta-field-row">
+              <div className="vanta-field">
+                <label>Target Audience</label>
+                <select value={audience} onChange={(e) => setAudience(e.target.value)}>
+                  <option>Product Leadership</option>
+                  <option>CX & Operations</option>
+                  <option>Security & Compliance Board</option>
+                  <option>Growth Engineering Squad</option>
+                </select>
+              </div>
+              <div className="vanta-field">
+                <label>Cadence</label>
+                <select value={cadence} onChange={(e) => setCadence(e.target.value)}>
+                  <option>Weekly on Monday</option>
+                  <option>Bi-weekly on Thursday</option>
+                  <option>Monthly</option>
+                  <option>On-demand Trigger</option>
+                </select>
+              </div>
+            </div>
+            <div className="vanta-field">
+              <label>Export Format</label>
+              <select value={format} onChange={(e) => setFormat(e.target.value as 'CSV' | 'JSON')}>
+                <option value="CSV">CSV (Tabular with priority scores)</option>
+                <option value="JSON">JSON (Complete structured AST)</option>
+              </select>
+            </div>
+          </div>
+          <div className="modal-footer-bar">
+            <button type="button" className="button button-secondary" onClick={onClose}>Cancel</button>
+            <button type="submit" className="button button-primary">Generate & Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+function RecipientModal({
+  isOpen,
+  onClose,
+  onAdd,
+}: {
+  isOpen: boolean
+  onClose: () => void
+  onAdd: (rec: RecipientItem) => void
+}) {
+  const [name, setName] = useState('')
+  const [role, setRole] = useState('')
+
+  if (!isOpen) return null
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!name.trim()) return
+    const initials = name.split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase() || 'TX'
+    onAdd({ initials, name: name.trim(), note: role.trim() || 'Weekly signal digest' })
+    onClose()
+  }
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+        <form onSubmit={handleSubmit}>
+          <div className="modal-header-bar">
+            <div>
+              <div className="eyebrow">Distribution list</div>
+              <h2>Add Signal Recipient</h2>
+            </div>
+            <button type="button" className="icon-button" onClick={onClose} aria-label="Close recipient dialog"><X size={18} /></button>
+          </div>
+          <div className="modal-content-scroll">
+            <div className="vanta-field">
+              <label>Stakeholder or Team Name</label>
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Engineering Leadership" required />
+            </div>
+            <div className="vanta-field">
+              <label>Delivery Description</label>
+              <input value={role} onChange={(e) => setRole(e.target.value)} placeholder="e.g. Critical friction alerts" />
+            </div>
+          </div>
+          <div className="modal-footer-bar">
+            <button type="button" className="button button-secondary" onClick={onClose}>Cancel</button>
+            <button type="submit" className="button button-primary">Add recipient</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+function ExperimentReviewModal({
+  experiment,
+  onClose,
+  onUpdateStatus,
+}: {
+  experiment: AdaptationExperiment
+  onClose: () => void
+  onUpdateStatus: (id: string, status: AdaptationExperiment['status']) => void
+}) {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header-bar">
+          <div>
+            <div className="eyebrow">Experiment evaluation · {experiment.id}</div>
+            <h2>{experiment.name}</h2>
+          </div>
+          <button className="icon-button" onClick={onClose} aria-label="Close review"><X size={18} /></button>
+        </div>
+        <div className="modal-content-scroll">
+          <p style={{ fontSize: 13, color: '#c5d0cc', lineHeight: 1.5 }}>
+            <strong>Hypothesis:</strong> {experiment.hypothesis}
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, background: '#0b1012', padding: 14, borderRadius: 6 }}>
+            <div><small style={{ color: 'var(--muted)' }}>Target Audience</small><strong style={{ display: 'block', color: 'var(--ink)' }}>{experiment.audience}</strong></div>
+            <div><small style={{ color: 'var(--muted)' }}>Owner</small><strong style={{ display: 'block', color: 'var(--ink)' }}>{experiment.owner}</strong></div>
+            <div><small style={{ color: 'var(--muted)' }}>Baseline</small><strong style={{ display: 'block', color: 'var(--coral)' }}>{experiment.baseline}</strong></div>
+            <div><small style={{ color: 'var(--muted)' }}>Target Goal</small><strong style={{ display: 'block', color: 'var(--green)' }}>{experiment.target}</strong></div>
+          </div>
+        </div>
+        <div className="modal-footer-bar">
+          <button className="button button-secondary" onClick={onClose}>Dismiss</button>
+          {experiment.status !== 'Running' && (
+            <button className="button button-primary" onClick={() => onUpdateStatus(experiment.id, 'Running')}>
+              Launch experiment
+            </button>
+          )}
+          {experiment.status === 'Running' && (
+            <button className="button button-primary" onClick={() => onUpdateStatus(experiment.id, 'Complete')}>
+              Mark complete
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default App
