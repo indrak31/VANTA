@@ -6,7 +6,6 @@ export type ViewKey =
   | 'simulator'
   | 'adaptation'
   | 'reports'
-  | 'admin'
 
 export type Sentiment = 'positive' | 'neutral' | 'negative'
 export type PriorityBand = 'critical' | 'high' | 'medium' | 'watch'

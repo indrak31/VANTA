@@ -720,17 +720,6 @@ export function LandingPage({ onLaunchApp }: { onLaunchApp: (view?: ViewKey) => 
                 Adaption Lab
               </a>
             </li>
-            <li>
-              <a
-                href="#admin"
-                onClick={(e) => {
-                  e.preventDefault()
-                  onLaunchApp('admin')
-                }}
-              >
-                Admin
-              </a>
-            </li>
           </ul>
 
           <div className="nav-actions">
