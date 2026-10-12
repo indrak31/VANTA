@@ -300,6 +300,14 @@ def create_app(*, db_path: str | None = None, app_settings: Settings | None = No
     def adaption_status() -> dict[str, Any]:
         return app.state.adaption.availability()
 
+    @app.get("/api/adaption/datasets", dependencies=[Depends(auth)], tags=["adaption"])
+    def adaption_datasets() -> list[dict[str, Any]]:
+        return app.state.adaption.list_datasets()
+
+    @app.post("/api/adaption/datasets/upload", dependencies=[Depends(auth)], tags=["adaption"])
+    def adaption_upload(name: str | None = None) -> dict[str, Any]:
+        return app.state.adaption.upload_dataset(name=name)
+
     @app.post("/api/adaption/estimate", response_model=AdaptionRunRead, dependencies=[Depends(auth)], tags=["adaption"])
     def adaption_estimate(payload: AdaptionRequest) -> AdaptionRunRead:
         return _adaption_response(app.state.adaption.execute(payload.model_dump(exclude_none=True), estimate=True))

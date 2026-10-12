@@ -185,3 +185,28 @@ export async function getAdaptionRun(base: string, runId: string): Promise<Adapt
   if (!response.ok) throw new Error('Adaption run status unavailable')
   return await response.json() as AdaptionRun
 }
+
+export interface AdaptionRemoteDataset {
+  id: string
+  name: string
+  status: string
+  row_count: number
+}
+
+export async function listAdaptionDatasets(base: string): Promise<AdaptionRemoteDataset[]> {
+  try {
+    const response = await fetch(`${trimBase(base)}/api/adaption/datasets`)
+    if (!response.ok) return []
+    return await response.json() as AdaptionRemoteDataset[]
+  } catch {
+    return []
+  }
+}
+
+export async function uploadAdaptionDataset(base: string, name?: string): Promise<{ id: string; name: string; status: string }> {
+  const url = `${trimBase(base)}/api/adaption/datasets/upload${name ? `?name=${encodeURIComponent(name)}` : ''}`
+  const response = await fetch(url, { method: 'POST' })
+  if (!response.ok) throw new Error('Dataset upload to Adaption failed')
+  return await response.json() as { id: string; name: string; status: string }
+}
+

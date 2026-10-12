@@ -148,3 +148,53 @@ class AdaptionAdapter:
         except Exception as exc:
             record["status_refresh_error"] = {"code": "adaption_status_failed", "message": str(exc)}
             return record
+
+    def list_datasets(self) -> list[dict[str, Any]]:
+        try:
+            client = self._client()
+            res = client.datasets.list()
+            return [
+                {
+                    "id": d.dataset_id,
+                    "name": getattr(d, "name", None) or "Untitled Dataset",
+                    "status": getattr(d, "status", "unknown"),
+                    "row_count": getattr(d, "row_count", 0),
+                }
+                for d in res.datasets
+            ]
+        except Exception:
+            return []
+
+    def upload_dataset(self, name: str | None = None) -> dict[str, Any]:
+        import csv
+        import tempfile
+        from datetime import datetime
+
+        client = self._client()
+        ds_name = name or f"vanta_signals_{int(datetime.now().timestamp())}"
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False, newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(["text", "rating", "category", "source"])
+            with self.db.connection() as conn:
+                rows = conn.execute("SELECT text, rating, category, source FROM feedback LIMIT 500").fetchall()
+                if not rows:
+                    writer.writerow(["The dashboard is slow when loading weekly reports", 2, "performance", "workspace"])
+                else:
+                    for row in rows:
+                        writer.writerow([row["text"], row["rating"], row["category"], row["source"]])
+            temp_path = f.name
+
+        try:
+            res = client.datasets.upload_file(temp_path, name=ds_name)
+            dataset_id = getattr(res, "dataset_id", None) or getattr(res, "id", None)
+            return {
+                "id": str(dataset_id),
+                "name": ds_name,
+                "status": getattr(res, "status", "pending"),
+            }
+        finally:
+            try:
+                os.remove(temp_path)
+            except OSError:
+                pass
+

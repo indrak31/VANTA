@@ -61,10 +61,12 @@ import {
   getAdaptionAvailability,
   getAdaptionRun,
   importRemoteFeedback,
+  listAdaptionDatasets,
   loadRemoteData,
   runAdaptionOperation,
+  uploadAdaptionDataset,
 } from './api'
-import type { AdaptionAvailability, AdaptionRun } from './api'
+import type { AdaptionAvailability, AdaptionRemoteDataset, AdaptionRun } from './api'
 import type {
   AdaptationExperiment,
   DashboardData,
@@ -858,7 +860,11 @@ function AdaptionLabConnected({
   onReviewExperiment: (experiment: AdaptationExperiment) => void
 }) {
   const [availability, setAvailability] = useState<AdaptionAvailability | null>(null)
-  const [datasetId, setDatasetId] = useState('')
+  const [datasetId, setDatasetId] = useState('f7da0d5c-4273-4c94-aef3-e37123cbada4')
+  const [remoteDatasets, setRemoteDatasets] = useState<AdaptionRemoteDataset[]>([
+    { id: 'f7da0d5c-4273-4c94-aef3-e37123cbada4', name: 'vanta_customer_feedback', status: 'awaiting_input', row_count: 6 },
+  ])
+  const [uploadingDataset, setUploadingDataset] = useState(false)
   const [run, setRun] = useState<AdaptionRun | null>(null)
   const [busy, setBusy] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
@@ -867,6 +873,14 @@ function AdaptionLabConnected({
   useEffect(() => {
     if (!providerReady || !apiEndpoint) return
     getAdaptionAvailability(apiEndpoint).then(setAvailability).catch(() => setAvailability(null))
+    listAdaptionDatasets(apiEndpoint)
+      .then((datasets) => {
+        if (datasets.length > 0) {
+          setRemoteDatasets(datasets)
+          setDatasetId((prev) => (prev ? prev : datasets[0].id))
+        }
+      })
+      .catch(() => undefined)
   }, [apiEndpoint, providerReady])
 
   useEffect(() => {
@@ -878,34 +892,52 @@ function AdaptionLabConnected({
     return () => window.clearInterval(timer)
   }, [apiEndpoint, run])
 
+  const handleUploadDataset = async () => {
+    if (!apiEndpoint || !providerReady) {
+      onToast('API server must be connected to sync dataset')
+      return
+    }
+    setUploadingDataset(true)
+    try {
+      const created = await uploadAdaptionDataset(apiEndpoint, `vanta_signals_${Date.now().toString().slice(-4)}`)
+      setDatasetId(created.id)
+      const list = await listAdaptionDatasets(apiEndpoint)
+      if (list.length) setRemoteDatasets(list)
+      onToast(`Uploaded new dataset: ${created.name} (${created.id.slice(0, 8)}…)`)
+    } catch (err) {
+      onToast(err instanceof Error ? err.message : 'Dataset upload to Adaption failed')
+    } finally {
+      setUploadingDataset(false)
+    }
+  }
+
   const operate = async (operation: 'estimate' | 'run') => {
     if (!apiEndpoint || !datasetId.trim()) {
-      onToast('Enter or select an Adaption dataset ID first')
+      onToast('Enter or select an Adaption dataset UUID first')
+      return
+    }
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    if (!uuidRegex.test(datasetId.trim())) {
+      onToast('Adaption requires a valid 36-char UUID (e.g. f7da0d5c-4273-4c94-aef3-e37123cbada4)')
       return
     }
     setBusy(true)
     try {
       const result = await runAdaptionOperation(apiEndpoint, operation, {
         dataset_id: datasetId.trim(),
-        column_mapping: { prompt: 'feedback', completion: 'recommendation', context: ['category', 'source'] },
+        column_mapping: { prompt: 'text', completion: 'category', context: ['rating', 'source'] },
         job_specification: { max_rows: 100 },
         recipe_specification: { recipes: { deduplication: true, prompt_rephrase: false } },
         brand_controls: { length: 'concise', hallucination_mitigation: true, blueprint: 'Use only the supplied customer evidence. Do not invent customer claims.' },
       })
       setRun(result)
-      onToast(operation === 'estimate' ? 'Adaption estimate received' : 'Adaption run submitted')
+      onToast(operation === 'estimate' ? 'Adaption estimate received successfully' : 'Adaption run submitted')
     } catch (error) {
       onToast(error instanceof Error ? error.message : `Adaption ${operation} failed`)
     } finally {
       setBusy(false)
     }
   }
-
-  const sampleDatasets = [
-    'ds_vanta_signals_2026',
-    'ds_enterprise_feedback_oct',
-    'ds_product_friction_q4',
-  ]
 
   return (
     <div className="view-stack">
@@ -933,20 +965,39 @@ function AdaptionLabConnected({
         </div>
         <div className="adaption-form">
           <label>
-            Adaption dataset ID
-            <input value={datasetId} onChange={(event) => setDatasetId(event.target.value)} placeholder="Paste or pick a dataset ID below…" />
+            Adaption dataset ID (UUID)
+            <input
+              value={datasetId}
+              onChange={(event) => setDatasetId(event.target.value)}
+              placeholder="e.g. f7da0d5c-4273-4c94-aef3-e37123cbada4"
+            />
           </label>
           <div className="dataset-chip-group">
-            <span>Quick fill:</span>
-            {sampleDatasets.map((ds) => (
-              <button key={ds} type="button" className="dataset-chip-btn" onClick={() => setDatasetId(ds)}>
-                {ds}
+            <span>Adaption Cloud Datasets:</span>
+            {remoteDatasets.map((ds) => (
+              <button
+                key={ds.id}
+                type="button"
+                className={`dataset-chip-btn ${datasetId === ds.id ? 'active' : ''}`}
+                onClick={() => setDatasetId(ds.id)}
+                title={ds.id}
+              >
+                <strong>{ds.name}</strong> <small>({ds.id.slice(0, 8)}…)</small>
               </button>
             ))}
+            <button
+              type="button"
+              className="dataset-chip-btn"
+              style={{ borderColor: 'rgba(142, 168, 255, 0.4)', color: '#8ea8ff', background: 'rgba(142, 168, 255, 0.08)' }}
+              onClick={handleUploadDataset}
+              disabled={uploadingDataset || !providerReady}
+            >
+              {uploadingDataset ? 'Syncing…' : '+ Sync Workspace Feedback to Adaption'}
+            </button>
           </div>
           <div className="adaption-mapping">
             <span className="eyebrow">Mapping sent with the request</span>
-            <code>prompt ← feedback · completion ← recommendation · context ← category, source</code>
+            <code>prompt ← text · completion ← category · context ← rating, source</code>
             <small>Recipes: deduplication on, prompt rephrasing off. Blueprint requires grounded, concise output.</small>
           </div>
           <div className="adaption-buttons">
