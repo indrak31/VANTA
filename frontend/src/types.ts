@@ -6,6 +6,7 @@ export type ViewKey =
   | 'simulator'
   | 'adaptation'
   | 'reports'
+  | 'admin'
 
 export type Sentiment = 'positive' | 'neutral' | 'negative'
 export type PriorityBand = 'critical' | 'high' | 'medium' | 'watch'
@@ -97,3 +98,14 @@ export interface DashboardData {
   experiments: AdaptationExperiment[]
   reports: ReportDefinition[]
 }
+
+export interface UserProfile {
+  id: string
+  name: string
+  email: string
+  role: 'Admin' | 'Product Lead' | 'Analyst' | 'Viewer'
+  org: string
+  lastActive: string
+}
+
+

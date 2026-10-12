@@ -24,6 +24,7 @@ import {
   Search,
   Send,
   Settings2,
+  Shield,
   SlidersHorizontal,
   Sparkles,
   Target,
@@ -72,10 +73,12 @@ import type {
   Recommendation,
   ReportDefinition,
   Scenario,
+  UserProfile,
   ViewKey,
 } from './types'
 import { LandingPage } from './landing/LandingPage'
 import { WorkspaceLoader } from './components/WorkspaceLoader'
+import { AdminConsole } from './components/AdminConsole'
 import './styles.css'
 
 const navItems: { key: ViewKey; label: string; icon: typeof LayoutDashboard }[] = [
@@ -86,6 +89,7 @@ const navItems: { key: ViewKey; label: string; icon: typeof LayoutDashboard }[] 
   { key: 'simulator', label: 'Counterfactual Simulator', icon: SlidersHorizontal },
   { key: 'adaptation', label: 'Adaption Lab', icon: FlaskConical },
   { key: 'reports', label: 'Reports', icon: FileBarChart },
+  { key: 'admin', label: 'Admin Console', icon: Shield },
 ]
 
 const pageMeta: Record<ViewKey, { eyebrow: string; title: string; description: string }> = {
@@ -96,6 +100,7 @@ const pageMeta: Record<ViewKey, { eyebrow: string; title: string; description: s
   simulator: { eyebrow: 'What-if analysis', title: 'Counterfactual Simulator', description: 'Test how changes to the experience could shift issue priority before investing.' },
   adaptation: { eyebrow: 'Learning loop', title: 'Adaption Lab', description: 'Turn promising recommendations into measurable experiments with clear baselines.' },
   reports: { eyebrow: 'Distribution', title: 'Reports', description: 'Package the signal for recurring reviews, stakeholder updates, and planning.' },
+  admin: { eyebrow: 'Enterprise Governance', title: 'Admin Console & Security Operations', description: 'Manage team role-based access control, ingestion webhooks, data privacy, and compliance audit logs.' },
 }
 
 const chartData = [
@@ -175,6 +180,16 @@ function App() {
   ])
   const [isLaunchingWorkspace, setIsLaunchingWorkspace] = useState(false)
   const [launchTargetView, setLaunchTargetView] = useState<ViewKey>('overview')
+
+  const defaultUserProfile: UserProfile = {
+    id: 'usr-admin-1',
+    name: 'Indra K',
+    email: 'indrak31@gmail.com',
+    role: 'Admin',
+    org: 'VANTA Enterprise',
+    lastActive: 'Just now',
+  }
+  const [currentUser] = useState<UserProfile>(() => readStorage<UserProfile>('vanta-user-profile', defaultUserProfile))
 
   useEffect(() => {
     const onHash = () => {
@@ -462,10 +477,10 @@ function App() {
             tabIndex={0}
             onClick={() => setProfileMenuOpen((open) => !open)}
           >
-            <div className="avatar">JD</div>
+            <div className="avatar">IK</div>
             <div>
-              <strong>Jordan Davis</strong>
-              <small>Product operations</small>
+              <strong>{currentUser.name}</strong>
+              <small>{currentUser.role} · {currentUser.org}</small>
             </div>
             <button aria-label="Open profile menu" onClick={(e) => { e.stopPropagation(); setProfileMenuOpen((o) => !o) }}>
               <ChevronRight size={15} />
@@ -474,9 +489,19 @@ function App() {
             {profileMenuOpen && (
               <div className="profile-popover" onClick={(event) => event.stopPropagation()}>
                 <div className="profile-popover-header">
-                  <strong>Jordan Davis</strong>
-                  <small>jordan.davis@vanta.io</small>
+                  <strong>{currentUser.name}</strong>
+                  <small>{currentUser.email}</small>
                 </div>
+                <button
+                  className="profile-popover-item"
+                  onClick={() => {
+                    setProfileMenuOpen(false)
+                    go('admin')
+                  }}
+                >
+                  <Shield size={14} />
+                  <span>Admin Console & Governance</span>
+                </button>
                 <button
                   className="profile-popover-item"
                   onClick={() => {
@@ -511,11 +536,11 @@ function App() {
                   className="profile-popover-item text-coral"
                   onClick={() => {
                     setProfileMenuOpen(false)
-                    setToast('Session active · Single sign-on authenticated')
+                    setToast('Enterprise Root session verified and active')
                   }}
                 >
                   <ExternalLink size={14} />
-                  <span>Sign out</span>
+                  <span>Session info</span>
                 </button>
               </div>
             )}
@@ -543,6 +568,15 @@ function App() {
               }}
             >
               ← Website
+            </button>
+            <button
+              className={`button button-secondary ${view === 'admin' ? 'active' : ''}`}
+              style={{ padding: '5px 12px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+              onClick={() => go('admin')}
+              title="Open Admin Console & Security Operations"
+            >
+              <Shield size={13} style={{ color: '#8ea8ff' }} />
+              <span>Admin</span>
             </button>
             <button className="icon-button" aria-label="Help" onClick={() => setHelpOpen(true)}>
               <CircleHelp size={18} />
@@ -591,6 +625,12 @@ function App() {
               onDownload={downloadReport}
               onOpenReportModal={() => setReportModalOpen(true)}
               onOpenRecipientModal={() => setRecipientModalOpen(true)}
+              onToast={setToast}
+            />
+          )}
+          {view === 'admin' && (
+            <AdminConsole
+              currentUser={currentUser}
               onToast={setToast}
             />
           )}

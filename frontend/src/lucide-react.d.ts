@@ -2,6 +2,7 @@ declare module 'lucide-react' {
   import type { ComponentType, SVGProps } from 'react'
   export type LucideProps = SVGProps<SVGSVGElement> & { size?: number | string; strokeWidth?: number | string }
   export const Activity: ComponentType<LucideProps>
+  export const AlertTriangle: ComponentType<LucideProps>
   export const ArrowDown: ComponentType<LucideProps>
   export const ArrowRight: ComponentType<LucideProps>
   export const ArrowUp: ComponentType<LucideProps>
@@ -24,8 +25,10 @@ declare module 'lucide-react' {
   export const GitBranch: ComponentType<LucideProps>
   export const Inbox: ComponentType<LucideProps>
   export const Info: ComponentType<LucideProps>
+  export const Key: ComponentType<LucideProps>
   export const Layers: ComponentType<LucideProps>
   export const LayoutDashboard: ComponentType<LucideProps>
+  export const Lock: ComponentType<LucideProps>
   export const Menu: ComponentType<LucideProps>
   export const MessageSquare: ComponentType<LucideProps>
   export const PanelRightClose: ComponentType<LucideProps>
