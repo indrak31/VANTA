@@ -1,8 +1,15 @@
 <div align="center">
 
-# ❖ VANTA Signal OS
+<a href="https://github.com/indrak31/VANTA">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/vanta-brand.png">
+    <source media="(prefers-color-scheme: light)" srcset="docs/assets/vanta-brand-dark.png">
+    <img alt="VANTA Signal OS" src="docs/assets/vanta-brand.png" width="340" />
+  </picture>
+</a>
 
-### Autonomous Customer Intelligence & Decision Analytics Platform
+<h2>Signal OS</h2>
+<p><strong>Autonomous Customer Intelligence & Decision Analytics Platform</strong></p>
 
 [![Frontend Arena Build Battle 2026](https://img.shields.io/badge/Hackathon-Frontend%20Arena%20Build%20Battle%202026-6366F1?style=for-the-badge&logo=target&logoColor=white)](https://github.com/indrak31/VANTA)
 [![License: MIT](https://img.shields.io/badge/License-MIT-10B981?style=for-the-badge)](LICENSE)
