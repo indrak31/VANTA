@@ -75,6 +75,7 @@ import type {
   ViewKey,
 } from './types'
 import { LandingPage } from './landing/LandingPage'
+import { WorkspaceLoader } from './components/WorkspaceLoader'
 import './styles.css'
 
 const navItems: { key: ViewKey; label: string; icon: typeof LayoutDashboard }[] = [
@@ -172,6 +173,8 @@ function App() {
     { initials: 'PL', name: 'Product leadership', note: 'Weekly signal brief' },
     { initials: 'CO', name: 'CX & operations', note: 'Enterprise friction review' },
   ])
+  const [isLaunchingWorkspace, setIsLaunchingWorkspace] = useState(false)
+  const [launchTargetView, setLaunchTargetView] = useState<ViewKey>('overview')
 
   useEffect(() => {
     const onHash = () => {
@@ -335,14 +338,28 @@ function App() {
     setToast(`${name} downloaded`)
   }
 
+  if (isLaunchingWorkspace) {
+    return (
+      <WorkspaceLoader
+        targetView={launchTargetView}
+        workspaceName={`${activeWorkspace.org} · ${activeWorkspace.name}`}
+        onComplete={() => {
+          window.location.hash = `#${launchTargetView}`
+          setAppMode('app')
+          setView(launchTargetView)
+          setIsLaunchingWorkspace(false)
+        }}
+      />
+    )
+  }
+
   if (appMode === 'landing') {
     return (
       <LandingPage
         onLaunchApp={(targetView?: ViewKey) => {
           const v = targetView || 'overview'
-          window.location.hash = `#${v}`
-          setAppMode('app')
-          setView(v)
+          setLaunchTargetView(v)
+          setIsLaunchingWorkspace(true)
         }}
       />
     )
@@ -389,6 +406,8 @@ function App() {
                   onClick={() => {
                     setActiveWorkspace(ws)
                     setWorkspaceOpen(false)
+                    setLaunchTargetView(view)
+                    setIsLaunchingWorkspace(true)
                     setToast(`Switched workspace to ${ws.org} · ${ws.name}`)
                   }}
                 >
