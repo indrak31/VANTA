@@ -144,7 +144,7 @@ export async function loadRemoteData(base: string, seeded: DashboardData): Promi
     fetch(`${root}/api/issues`),
     fetch(`${root}/api/recommendations`),
   ])
-  if (!feedbackResponse.ok || !issueResponse.ok || !recommendationResponse.ok) throw new Error('InsightFlow API unavailable')
+  if (!feedbackResponse.ok || !issueResponse.ok || !recommendationResponse.ok) throw new Error('VANTA API unavailable')
   const apiFeedback = await feedbackResponse.json() as ApiFeedback[]
   const feedback = apiFeedback.map(mapFeedback)
   const apiIssues = await issueResponse.json() as ApiIssue[]

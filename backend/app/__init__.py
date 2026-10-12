@@ -1,1 +1,1 @@
-"""InsightFlow Nexus backend."""
+"""VANTA Signal OS backend."""

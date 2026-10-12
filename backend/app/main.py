@@ -57,9 +57,9 @@ def create_app(*, db_path: str | None = None, app_settings: Settings | None = No
         yield
 
     app = FastAPI(
-        title="InsightFlow Nexus API",
+        title="VANTA Signal OS API",
         version="1.0.0",
-        description="Deterministic feedback intelligence with optional Adaption integration.",
+        description="VANTA Customer Intelligence & Decision Analytics API with Adaption integration.",
         lifespan=lifespan,
     )
     app.state.database = database
@@ -115,7 +115,7 @@ def create_app(*, db_path: str | None = None, app_settings: Settings | None = No
     @app.get("/health", response_model=HealthRead, tags=["system"])
     def health() -> dict[str, Any]:
         availability = app.state.adaption.availability()
-        return {"status": "ok", "service": "insightflow-nexus", "adaption": availability}
+        return {"status": "ok", "service": "vanta-signal-os", "adaption": availability}
 
     @app.post("/api/feedback", response_model=FeedbackRead, status_code=201, dependencies=[Depends(auth)], tags=["feedback"])
     def create_feedback(payload: FeedbackCreate, database: Database = Depends(db)) -> FeedbackRead:
@@ -333,7 +333,7 @@ def create_app(*, db_path: str | None = None, app_settings: Settings | None = No
             rows = conn.execute("SELECT id,text,rating,category,source,sentiment,sentiment_score,created_at FROM feedback ORDER BY created_at,id").fetchall()
             for row in rows:
                 writer.writerow([safe_csv_cell(row[key]) for key in ("id", "text", "rating", "category", "source", "sentiment", "sentiment_score", "created_at")])
-        return StreamingResponse(iter([output.getvalue()]), media_type="text/csv", headers={"Content-Disposition": "attachment; filename=insightflow-feedback.csv"})
+        return StreamingResponse(iter([output.getvalue()]), media_type="text/csv", headers={"Content-Disposition": "attachment; filename=vanta-feedback.csv"})
 
     @app.get("/api/reports/summary.json", dependencies=[Depends(auth)], tags=["reports"])
     def export_summary(database: Database = Depends(db)) -> dict[str, Any]:

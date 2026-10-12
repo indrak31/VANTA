@@ -32,14 +32,21 @@ class Settings:
 
     @classmethod
     def from_env(cls) -> "Settings":
-        database_path = Path(os.getenv("DATABASE_PATH", "data/insightflow.sqlite3"))
+        db_env = os.getenv("DATABASE_PATH")
+        if db_env:
+            database_path = Path(db_env)
+        elif Path("data/vanta.sqlite3").exists():
+            database_path = Path("data/vanta.sqlite3")
+        else:
+            database_path = Path("data/insightflow.sqlite3")
+
         return cls(
             database_path=database_path,
             cors_origins=_csv_env(
                 "CORS_ORIGINS",
                 "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000",
             ),
-            api_key=os.getenv("INSIGHTFLOW_API_KEY") or None,
+            api_key=os.getenv("VANTA_API_KEY") or os.getenv("INSIGHTFLOW_API_KEY") or None,
             max_csv_bytes=max(1, int(os.getenv("MAX_CSV_BYTES", "2097152"))),
             max_csv_rows=max(1, int(os.getenv("MAX_CSV_ROWS", "10000"))),
             adaption_timeout_seconds=max(1.0, float(os.getenv("ADAPTION_TIMEOUT_SECONDS", "30"))),

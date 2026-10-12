@@ -1,17 +1,52 @@
-backend/.venv/
+# Environment & Secrets (NEVER COMMIT)
 .env
 *.env
 backend/.env
-backend/data/*.sqlite3
-data/*.sqlite3
-*.sqlite3
-frontend/node_modules/
-frontend/dist/
 frontend/.env
-frontend/vite.log
-frontend/vite-error.log
+.env.local
+.env.*.local
+
+# Python
 __pycache__/
 *.py[cod]
+*$py.class
+backend/.venv/
+.venv/
+venv/
+ENV/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node.js & Frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/vite.log
+frontend/vite-error.log
+.npm/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Databases (Local Runtime Storage)
+backend/data/*.sqlite3
+backend/data/*.sqlite3-wal
+backend/data/*.sqlite3-shm
+data/*.sqlite3
+data/*.sqlite3-wal
+data/*.sqlite3-shm
+*.sqlite3
+
+# IDE & OS Artifacts
 .opencode/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
 /*.png
 vanta-desktop.png

@@ -1,54 +1,57 @@
-# InsightFlow Nexus architecture
+# VANTA Signal OS — System Architecture
 
-## Request flow
+VANTA transforms multi-channel customer feedback into deterministic clusters, evidence-backed issue priorities, counterfactual simulations, and continuous fine-tuning pipelines.
+
+## 1. End-to-End Request Flow
 
 ```text
-CSV/manual feedback
-        |
-        v
-FastAPI validation -> SQLite feedback table -> deterministic analysis refresh
-                                                  |
-                                                  +--> issue clusters + memberships
-                                                  +--> priority breakdown
-                                                  +--> recommendations
-                                                  +--> report exports
-
-Adaption Lab -> backend adapter -> adaption.Adaption.datasets.adapt -> provider receipt
-                                      |
-                                      +--> datasets.get_status polling
-                                      +--> persisted run history
+Multi-Channel Ingestion (CSV / Manual / API / Webhook)
+                       │
+                       ▼
+        FastAPI Input Validation & Sanitization
+                       │
+                       ▼
+          SQLite Persistence (WAL Mode)
+                       │
+         ┌─────────────┴─────────────┐
+         ▼                           ▼
+Deterministic Analysis Engine   Adaption Cloud Adapter
+  ├─ Sentiment Scoring (VADER)    ├─ Pre-flight Cost/Time Estimation
+  ├─ Semantic Grouping            ├─ Task-Specific Column Mapping
+  ├─ 5-Factor Priority Matrix     ├─ Blueprint & Brand Controls
+  ├─ Recommendation Generator     └─ Official Python SDK Execution
+  └─ Counterfactual Simulator
 ```
 
-## Data boundaries
+## 2. Core Data Boundaries
 
-- `feedback` stores raw customer language, ratings, source, sentiment label/score, and timestamps.
-- `issues` stores reproducible clusters and priority components.
-- `issue_feedback` stores provenance links between clusters and source records.
-- `adaption_runs` stores the operation, dataset ID, provider run ID, status, request metadata, response, and error details.
-- Browser `localStorage` stores only saved issue IDs and scenario presets; it is not the system of record.
+- **`feedback`**: Raw customer verbatim, numerical ratings, channel origin, sentiment label/score, and ISO-8601 timestamps.
+- **`issues`**: Reproducible clusters, computed priority scores, and constituent factor breakdowns.
+- **`issue_feedback`**: Strict relational provenance mapping clusters to exact customer quotes.
+- **`adaption_runs`**: Persisted audit trail storing operation type, remote dataset ID, provider run ID, status, recipe settings, and raw provider receipts.
+- **`localStorage`**: Client-side convenience persistence for bookmarked issues and counterfactual scenario presets (`ifn-saved-issues`, `ifn-saved-scenarios`).
 
-## Priority formula
+## 3. Deterministic Priority Matrix
 
-The backend records the exact breakdown for each cluster:
+Every issue cluster is ranked using an explainable, auditable 0–100 formula:
 
 ```text
-100 * (
-  0.25 * volume
-  + 0.30 * negative_rate
-  + 0.20 * rating_risk
-  + 0.20 * sentiment_risk
-  + 0.05 * recency
+Score = 100 × (
+    0.25 × Volume
+  + 0.30 × Negative_Rate
+  + 0.20 × Rating_Risk
+  + 0.20 × Sentiment_Risk
+  + 0.05 × Recency
 )
 ```
 
-Each factor is normalized to `[0, 1]`. `priority_breakdown` is returned by the API so the ranking can be audited.
+Each metric is strictly normalized to `[0, 1]`. The API returns the granular `priority_breakdown` with each issue so that product leaders and engineers can audit why an issue was prioritized over another.
 
-## Security and reliability notes
+## 4. Security, Reliability & Provenance
 
-- CSV imports are size/row bounded and reject formula-like cells.
-- Pydantic rejects unexpected fields and validates ratings, text length, statuses, and Adaption request shapes.
-- Customer text is rendered as React text, not HTML.
-- Provider keys are read server-side from `ADAPTION_API_KEY`.
-- `INSIGHTFLOW_API_KEY` can protect the API with `X-API-Key`.
-- Adaption errors are persisted without claiming synthetic outcomes.
-- The current local default is SQLite; production deployment should place it on persistent storage and add auth/session identity before handling multi-tenant customer data.
+- **Formula Injection Defense**: CSV imports and exports neutralize prefix triggers (`=`, `+`, `-`, `@`, `\t`, `\r`) to eliminate spreadsheet injection risks.
+- **Bounded Ingestion**: Enforces hard caps via `MAX_CSV_BYTES` (default 2 MB) and `MAX_CSV_ROWS` (default 10,000) to protect backend memory.
+- **Strict Pydantic Validation**: All incoming payloads undergo schema validation; unexpected fields are rejected.
+- **Server-Side Credential Isolation**: `ADAPTION_API_KEY` is strictly held on the backend server and never leaked or exposed to client-side bundles.
+- **API Guarding**: When `VANTA_API_KEY` (or legacy `INSIGHTFLOW_API_KEY`) is set, all `/api/*` endpoints require authentication via the `X-API-Key` header.
+- **Zero-Fabrication Principle**: Adaption runs require a real provider response and API key. If unconfigured or failed, VANTA returns an honest, persisted HTTP 503 error receipt without inventing artificial metrics.
