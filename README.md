@@ -28,7 +28,17 @@
 **Every signal. One clear direction.**  
 *VANTA transforms unstructured, multi-channel customer language into deterministic issue clusters, explainable priority rankings, counterfactual simulations, and continuous fine-tuning pipelines.*
 
-[Key Features](#-key-features) • [System Architecture](#-system-architecture) • [Priority Formula](#-deterministic-priority-matrix) • [Quickstart](#-quickstart-guide) • [Deployment Guide](DEPLOYMENT.md) • [API Reference](#-api-reference) • [Adaption Integration](#-adaption-ai-cloud-integration) • [Security](#-security--data-integrity)
+[Key Features](#-key-features) • [Cinematic Film](#-cinematic-product-film) • [System Architecture](#-system-architecture) • [Priority Formula](#-deterministic-priority-matrix) • [Quickstart](#-quickstart-guide) • [Deployment Guide](DEPLOYMENT.md) • [API Reference](#-api-reference) • [Adaption Integration](#-adaption-ai-cloud-integration)
+
+<br/>
+
+<a href="docs/assets/vanta_demo.mp4" title="Watch the VANTA Cinematic Product Film">
+  <img src="docs/assets/vanta_demo_poster.png" alt="VANTA Cinematic Product Demo Film" width="920" style="border-radius: 10px; border: 1px solid #222734; box-shadow: 0 16px 40px rgba(0,0,0,0.6);" />
+</a>
+
+<p align="center">
+  <em>▶ <strong><a href="docs/assets/vanta_demo.mp4">Click to watch the 1080p Cinematic Film (24s · 30 FPS · docs/assets/vanta_demo.mp4)</a></strong></em>
+</p>
 
 </div>
 
