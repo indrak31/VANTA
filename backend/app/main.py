@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import io
+import os
 import secrets
 import uuid
 from contextlib import asynccontextmanager
@@ -44,7 +45,7 @@ def as_utc_iso(value: datetime | None) -> str:
     return value.astimezone(UTC).isoformat()
 
 
-def create_app(*, db_path: str | None = None, app_settings: Settings | None = None) -> FastAPI:
+def create_app(*, db_path: str | None = None, app_settings: Settings | None = None, auto_seed: bool = False) -> FastAPI:
     current_settings = app_settings or settings
     database = Database(db_path or current_settings.database_path)
     # Initialize eagerly as well as in lifespan so programmatic TestClient use
@@ -54,6 +55,12 @@ def create_app(*, db_path: str | None = None, app_settings: Settings | None = No
     @asynccontextmanager
     async def lifespan(_: FastAPI):
         database.init()
+        if auto_seed:
+            try:
+                from .seed import seed
+                seed(database.path)
+            except Exception:
+                pass
         yield
 
     app = FastAPI(
@@ -348,4 +355,4 @@ def create_app(*, db_path: str | None = None, app_settings: Settings | None = No
     return app
 
 
-app = create_app()
+app = create_app(auto_seed=os.getenv("AUTO_SEED", "true").lower() in ("true", "1", "yes"))

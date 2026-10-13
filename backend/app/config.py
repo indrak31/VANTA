@@ -44,7 +44,7 @@ class Settings:
             database_path=database_path,
             cors_origins=_csv_env(
                 "CORS_ORIGINS",
-                "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000",
+                "*,http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000",
             ),
             api_key=os.getenv("VANTA_API_KEY") or os.getenv("INSIGHTFLOW_API_KEY") or None,
             max_csv_bytes=max(1, int(os.getenv("MAX_CSV_BYTES", "2097152"))),

@@ -28,7 +28,7 @@
 **Every signal. One clear direction.**  
 *VANTA transforms unstructured, multi-channel customer language into deterministic issue clusters, explainable priority rankings, counterfactual simulations, and continuous fine-tuning pipelines.*
 
-[Key Features](#-key-features) • [System Architecture](#-system-architecture) • [Priority Formula](#-deterministic-priority-matrix) • [Quickstart](#-quickstart-guide) • [API Reference](#-api-reference) • [Adaption Integration](#-adaption-ai-cloud-integration) • [Security](#-security--data-integrity)
+[Key Features](#-key-features) • [System Architecture](#-system-architecture) • [Priority Formula](#-deterministic-priority-matrix) • [Quickstart](#-quickstart-guide) • [Deployment Guide](DEPLOYMENT.md) • [API Reference](#-api-reference) • [Adaption Integration](#-adaption-ai-cloud-integration) • [Security](#-security--data-integrity)
 
 </div>
 
